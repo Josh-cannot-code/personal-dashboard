@@ -21,7 +21,13 @@ type alias Model =
 
 init : () -> ( Model, Cmd msg )
 init _ =
-    ( { activities = Array.fromList [ "Read", "Bonsai", "Workout", "Work on site", "Guitar" ]
+    ( { activities = Array.fromList
+    [ "Read"
+    , "Bonsai"
+    , "Workout"
+    , "Work on site"
+    , "Guitar"
+    , "Plant watering system"]
       , index = 0
       , links =
             [ ( "Calendar", "https://calendar.google.com/calendar/u/2/r" )
@@ -36,10 +42,8 @@ init _ =
 generateActivityCard : Model -> Html Msg
 generateActivityCard model =
     div [ class "card" ]
-        [ div [ class "card-header" ]
-            [ h2 [] [ text "Free Time" ]
-            ]
-        , div [ class "card-body" ]
+        [
+         div [ class "card-body" ]
             [ p [ class "fs-5" ] [ getActivityByIndex model |> text ]
             , button [ class "btn btn-primary", onClick GenerateRandomNumber ] [ text "New Activity" ]
             ]
@@ -51,7 +55,7 @@ displayLinks links =
     let
         createLi : Link -> Html Msg
         createLi link =
-            li [ class "nav-item", style "padding" "0.5vh" ]
+            li [ class "nav-item w-50", style "padding" "0.5ex" ]
                 [ a [ class "nav-link active", Tuple.second link |> href, target "_blank" ] [ Tuple.first link |> text ]
                 ]
     in
@@ -62,7 +66,7 @@ displayLinks links =
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ div [ class "row", style "padding" "1vh" ]
+        [ div [ class "row", style "padding" "1ex" ]
             [ div [ class "col" ]
                 [ displayLinks model.links
                 ]

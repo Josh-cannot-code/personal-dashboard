@@ -5284,7 +5284,7 @@ var $author$project$Main$init = function (_v0) {
 		{
 			activities: $elm$core$Array$fromList(
 				_List_fromArray(
-					['Read', 'Bonsai', 'Workout', 'Work on site', 'Guitar'])),
+					['Read', 'Bonsai', 'Workout', 'Work on site', 'Guitar', 'Plant watering system'])),
 			index: 0,
 			links: _List_fromArray(
 				[
@@ -5505,8 +5505,8 @@ var $author$project$Main$displayLinks = function (links) {
 			$elm$html$Html$li,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('nav-item'),
-					A2($elm$html$Html$Attributes$style, 'padding', '0.5vh')
+					$elm$html$Html$Attributes$class('nav-item w-50'),
+					A2($elm$html$Html$Attributes$style, 'padding', '0.5ex')
 				]),
 			_List_fromArray(
 				[
@@ -5584,7 +5584,6 @@ var $author$project$Main$getActivityByIndex = function (model) {
 		return '';
 	}
 };
-var $elm$html$Html$h2 = _VirtualDom_node('h2');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -5612,22 +5611,6 @@ var $author$project$Main$generateActivityCard = function (model) {
 			]),
 		_List_fromArray(
 			[
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('card-header')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$h2,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Free Time')
-							]))
-					])),
 				A2(
 				$elm$html$Html$div,
 				_List_fromArray(
@@ -5675,7 +5658,7 @@ var $author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						$elm$html$Html$Attributes$class('row'),
-						A2($elm$html$Html$Attributes$style, 'padding', '1vh')
+						A2($elm$html$Html$Attributes$style, 'padding', '1ex')
 					]),
 				_List_fromArray(
 					[
