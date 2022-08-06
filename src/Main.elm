@@ -12,7 +12,7 @@ import Bootstrap.Text as Text
 import Bootstrap.Utilities.Spacing as Spacing
 import Browser exposing (sandbox)
 import Html exposing (..)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
 import Random exposing (..)
 
@@ -31,32 +31,28 @@ init _ =
     , Cmd.none
     )
 
-
 generateActivityCard : Model -> Html Msg
 generateActivityCard model =
-    Card.config []
-        |> Card.header [ class "text-center" ]
-            [ h2 [] [ text "Free Time" ]
-            ]
-        |> Card.block []
-            [ Block.custom <| Button.button [ Button.primary, Button.onClick GenerateRandomNumber ] [ text "New Activity" ]
-            , Block.text [] [ getActivityByIndex model |> text ]
-            ]
-        |> Card.view
+    div [ class "card"] [
+        div [class "card-header"] [
+            h2 [] [text "Free Time"]
+        ]
+        , div [ class "card-body" ] [
+            button [ class "btn btn-primary", onClick GenerateRandomNumber ] [ text "New Activity"]
+            , getActivityByIndex model |> text
+        ]
+    ]
 
 
 view : Model -> Html Msg
 view model =
-    Grid.container []
-        [ CDN.stylesheet
-        , Grid.row
-            [ Row.attrs [ Spacing.p4 ] ]
-            [ Grid.col
-                [ Col.textAlign Text.alignLgCenter ]
-                [ generateActivityCard model ]
+    div [class "container"] [
+        div [class "row text-center", style "padding" "1vh"] [
+            div [ class "col" ] [
+                generateActivityCard model
             ]
         ]
-
+    ]
 
 type Msg
     = GenerateRandomNumber
