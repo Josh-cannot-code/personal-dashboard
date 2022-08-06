@@ -1,58 +1,78 @@
 module Main exposing (..)
 
 import Array exposing (..)
-import Bootstrap.Button as Button
-import Bootstrap.CDN as CDN
-import Bootstrap.Card as Card
-import Bootstrap.Card.Block as Block
-import Bootstrap.Grid as Grid
-import Bootstrap.Grid.Col as Col
-import Bootstrap.Grid.Row as Row
-import Bootstrap.Text as Text
-import Bootstrap.Utilities.Spacing as Spacing
-import Browser exposing (sandbox)
+import Browser
 import Html exposing (..)
-import Html.Attributes exposing (class, style)
+import Html.Attributes exposing (class, href, style, target)
 import Html.Events exposing (onClick)
 import Random exposing (..)
+
+
+type alias Link =
+    ( String, String )
 
 
 type alias Model =
     { activities : Array String
     , index : Int
+    , links : List Link
     }
 
 
 init : () -> ( Model, Cmd msg )
 init _ =
-    ( { activities = Array.fromList [ "Read", "Bonsai", "Workout", "Work on site" ]
+    ( { activities = Array.fromList [ "Read", "Bonsai", "Workout", "Work on site", "Guitar" ]
       , index = 0
+      , links =
+            [ ( "Calendar", "https://calendar.google.com/calendar/u/2/r" )
+            , ( "MyCourses", "https://mycourses2.mcgill.ca/d2l/home" )
+            , ( "GitHub", "https://github.com" )
+            ]
       }
     , Cmd.none
     )
 
+
 generateActivityCard : Model -> Html Msg
 generateActivityCard model =
-    div [ class "card"] [
-        div [class "card-header"] [
-            h2 [] [text "Free Time"]
+    div [ class "card" ]
+        [ div [ class "card-header" ]
+            [ h2 [] [ text "Free Time" ]
+            ]
+        , div [ class "card-body" ]
+            [ p [ class "fs-5" ] [ getActivityByIndex model |> text ]
+            , button [ class "btn btn-primary", onClick GenerateRandomNumber ] [ text "New Activity" ]
+            ]
         ]
-        , div [ class "card-body" ] [
-            button [ class "btn btn-primary", onClick GenerateRandomNumber ] [ text "New Activity"]
-            , getActivityByIndex model |> text
-        ]
-    ]
+
+
+displayLinks : List Link -> Html Msg
+displayLinks links =
+    let
+        createLi : Link -> Html Msg
+        createLi link =
+            li [ class "nav-item", style "padding" "0.5vh" ]
+                [ a [ class "nav-link active", Tuple.second link |> href, target "_blank" ] [ Tuple.first link |> text ]
+                ]
+    in
+    List.map createLi links
+        |> ul [ class "nav flex-column nav-pills" ]
 
 
 view : Model -> Html Msg
 view model =
-    div [class "container"] [
-        div [class "row text-center", style "padding" "1vh"] [
-            div [ class "col" ] [
-                generateActivityCard model
+    div [ class "container" ]
+        [ div [ class "row", style "padding" "1vh" ]
+            [ div [ class "col" ]
+                [ displayLinks model.links
+                ]
+            , div [ class "col text-center" ]
+                [ generateActivityCard model
+                ]
+            , div [ class "col" ] []
             ]
         ]
-    ]
+
 
 type Msg
     = GenerateRandomNumber
@@ -71,7 +91,7 @@ update msg model =
             )
 
         NewRandomNumber number ->
-            ( { activities = model.activities, index = number }, Cmd.none )
+            ( { activities = model.activities, index = number, links = model.links }, Cmd.none )
 
 
 getActivityByIndex : Model -> String

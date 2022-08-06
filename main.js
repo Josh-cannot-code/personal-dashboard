@@ -5284,8 +5284,14 @@ var $author$project$Main$init = function (_v0) {
 		{
 			activities: $elm$core$Array$fromList(
 				_List_fromArray(
-					['Read', 'Bonsai', 'Workout', 'Work on site'])),
-			index: 0
+					['Read', 'Bonsai', 'Workout', 'Work on site', 'Guitar'])),
+			index: 0,
+			links: _List_fromArray(
+				[
+					_Utils_Tuple2('Calendar', 'https://calendar.google.com/calendar/u/2/r'),
+					_Utils_Tuple2('MyCourses', 'https://mycourses2.mcgill.ca/d2l/home'),
+					_Utils_Tuple2('GitHub', 'https://github.com')
+				])
 		},
 		$elm$core$Platform$Cmd$none);
 };
@@ -5462,7 +5468,7 @@ var $author$project$Main$update = F2(
 		} else {
 			var number = msg.a;
 			return _Utils_Tuple2(
-				{activities: model.activities, index: number},
+				{activities: model.activities, index: number, links: model.links},
 				$elm$core$Platform$Cmd$none);
 		}
 	});
@@ -5475,6 +5481,57 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $elm$html$Html$a = _VirtualDom_node('a');
+var $elm$html$Html$Attributes$href = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'href',
+		_VirtualDom_noJavaScriptUri(url));
+};
+var $elm$html$Html$li = _VirtualDom_node('li');
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $elm$html$Html$Attributes$target = $elm$html$Html$Attributes$stringProperty('target');
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$ul = _VirtualDom_node('ul');
+var $author$project$Main$displayLinks = function (links) {
+	var createLi = function (link) {
+		return A2(
+			$elm$html$Html$li,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('nav-item'),
+					A2($elm$html$Html$Attributes$style, 'padding', '0.5vh')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$a,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('nav-link active'),
+							$elm$html$Html$Attributes$href(link.b),
+							$elm$html$Html$Attributes$target('_blank')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(link.a)
+						]))
+				]));
+	};
+	return A2(
+		$elm$html$Html$ul,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('nav flex-column nav-pills')
+			]),
+		A2($elm$core$List$map, createLi, links));
+};
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $author$project$Main$GenerateRandomNumber = {$: 'GenerateRandomNumber'};
 var $elm$html$Html$button = _VirtualDom_node('button');
@@ -5545,8 +5602,7 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$p = _VirtualDom_node('p');
 var $author$project$Main$generateActivityCard = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -5581,6 +5637,17 @@ var $author$project$Main$generateActivityCard = function (model) {
 				_List_fromArray(
 					[
 						A2(
+						$elm$html$Html$p,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('fs-5')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(
+								$author$project$Main$getActivityByIndex(model))
+							])),
+						A2(
 						$elm$html$Html$button,
 						_List_fromArray(
 							[
@@ -5590,14 +5657,10 @@ var $author$project$Main$generateActivityCard = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$text('New Activity')
-							])),
-						$elm$html$Html$text(
-						$author$project$Main$getActivityByIndex(model))
+							]))
 					]))
 			]));
 };
-var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $author$project$Main$view = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -5611,7 +5674,7 @@ var $author$project$Main$view = function (model) {
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('row text-center'),
+						$elm$html$Html$Attributes$class('row'),
 						A2($elm$html$Html$Attributes$style, 'padding', '1vh')
 					]),
 				_List_fromArray(
@@ -5624,8 +5687,25 @@ var $author$project$Main$view = function (model) {
 							]),
 						_List_fromArray(
 							[
+								$author$project$Main$displayLinks(model.links)
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('col text-center')
+							]),
+						_List_fromArray(
+							[
 								$author$project$Main$generateActivityCard(model)
-							]))
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('col')
+							]),
+						_List_Nil)
 					]))
 			]));
 };
