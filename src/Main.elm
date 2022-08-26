@@ -6,6 +6,8 @@ import Html exposing (..)
 import Html.Attributes exposing (class, href, style, target)
 import Html.Events exposing (onClick)
 import Random exposing (..)
+import Time
+import Task
 
 
 type alias Link =
@@ -16,10 +18,12 @@ type alias Model =
     { activities : Array String
     , index : Int
     , links : List Link
+    , zone : Time.Zone
+    , time : Time.Posix
     }
 
 
-init : () -> ( Model, Cmd msg )
+init : () -> ( Model, Cmd Msg )
 init _ =
     ( { activities = Array.fromList
     [ "Read"
@@ -27,17 +31,68 @@ init _ =
     , "Workout"
     , "Work on site"
     , "Guitar"
-    , "Plant watering system"]
+    , "Plant watering system" ]
       , index = 0
       , links =
             [ ( "Calendar", "https://calendar.google.com/calendar/u/2/r" )
             , ( "MyCourses", "https://mycourses2.mcgill.ca/d2l/home" )
             , ( "GitHub", "https://github.com" )
             ]
+      , time = Time.millisToPosix 0
+      , zone = Time.utc
       }
-    , Cmd.none
+    , Task.perform AdjustTimeZone Time.here
     )
 
+
+type Msg
+    = GenerateRandomNumber
+    | NewRandomNumber Int
+    | AdjustTimeZone Time.Zone
+    | Tick Time.Posix
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        GenerateRandomNumber ->
+            ( model
+            , Array.length model.activities
+                - 1
+                |> Random.int 0
+                |> Random.generate NewRandomNumber
+            )
+
+        NewRandomNumber number ->
+            ( { model | index = number }
+            , Cmd.none
+            )
+
+        Tick newTime ->
+            ( {model | time = newTime}
+            , Cmd.none
+            )
+
+        AdjustTimeZone newZone ->
+            ( { model | zone = newZone }
+            , Cmd.none
+            )
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Time.every 1000 Tick
+
+timeCard : Model -> Html Msg
+timeCard model =
+    let
+        hour = String.fromInt (Time.toHour model.zone model.time)
+        minute = String.fromInt (Time.toMinute model.zone model.time)
+    in
+    div [ class "card"]
+        [
+            div [ class "card-body" ]
+                [p [ class "fs-5" ] [text (hour ++ ":" ++ minute) ]]
+        ]
 
 generateActivityCard : Model -> Html Msg
 generateActivityCard model =
@@ -66,36 +121,20 @@ displayLinks links =
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ div [ class "row", style "padding" "1ex" ]
+        [ div [ class "row", style "padding" "1ex", style "padding-top" "10ex" ]
             [ div [ class "col" ]
                 [ displayLinks model.links
                 ]
             , div [ class "col text-center" ]
-                [ generateActivityCard model
-                ]
-            , div [ class "col" ] []
+                [ generateActivityCard model ]
+            , div [ class "col text-center" ]
+               [ timeCard model ]
             ]
+
         ]
 
 
-type Msg
-    = GenerateRandomNumber
-    | NewRandomNumber Int
 
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of
-        GenerateRandomNumber ->
-            ( model
-            , Array.length model.activities
-                - 1
-                |> Random.int 0
-                |> Random.generate NewRandomNumber
-            )
-
-        NewRandomNumber number ->
-            ( { activities = model.activities, index = number, links = model.links }, Cmd.none )
 
 
 getActivityByIndex : Model -> String
@@ -118,5 +157,5 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = subscriptions
         }
