@@ -27,4 +27,4 @@ jobs:
         run: pkill elm-live || true
 
       - name: run elm-live
-        run: ./run.sh
+        run: ./$HOME/personal-dashboard/run.sh
