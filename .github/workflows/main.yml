@@ -10,14 +10,10 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Install and setup elm
+      - name: Pull recent changes
         run: |
-          cd $HOME/elm
-          curl -L -o elm.gz https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz
-          gunzip elm.gz
-          chmod +x elm
-          sudo mv elm /usr/local/bin/
-          npm install elm-live
+          cd $HOME/personal-dashboard
+          git pull
 
   deploy:
     runs-on: self-hosted
