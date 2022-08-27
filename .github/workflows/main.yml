@@ -1,4 +1,4 @@
-name: Deploy to Raspberry Pi
+name: Update Raspberry Pi
 
 on:
   push:
@@ -14,12 +14,3 @@ jobs:
         run: |
           cd $HOME/personal-dashboard
           git pull
-
-  deploy:
-    runs-on: self-hosted
-    needs: build
-    steps:
-      - name: run elm-live
-        run: |
-          cd $HOME/personal-dashboard
-          http-server
