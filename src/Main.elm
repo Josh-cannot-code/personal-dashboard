@@ -117,6 +117,18 @@ displayLinks links =
     List.map createLi links
         |> ul [ class "nav flex-column nav-pills" ]
 
+getActivityByIndex : Model -> String
+getActivityByIndex model =
+    let
+        activity =
+            Array.get model.index model.activities
+    in
+    case activity of
+        Just a ->
+            a
+
+        Nothing ->
+            ""
 
 view : Model -> Html Msg
 view model =
@@ -132,24 +144,6 @@ view model =
             ]
 
         ]
-
-
-
-
-
-getActivityByIndex : Model -> String
-getActivityByIndex model =
-    let
-        activity =
-            Array.get model.index model.activities
-    in
-    case activity of
-        Just a ->
-            a
-
-        Nothing ->
-            ""
-
 
 main : Program () Model Msg
 main =
