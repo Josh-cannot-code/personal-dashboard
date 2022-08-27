@@ -19,8 +19,7 @@ jobs:
     runs-on: self-hosted
     needs: build
     steps:
-      - name: Kill elm-live
-        run: pkill elm-live || true
-
       - name: run elm-live
-        run: $HOME/personal-dashboard/run.sh
+        run: |
+          cd $HOME/personal-dashboard
+          http-server
