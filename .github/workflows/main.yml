@@ -10,7 +10,15 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Pull recent changes
+      - name: Pull recent changes and build
         run: |
           cd $HOME/personal-dashboard
           git pull
+          go build backend/main.go
+
+  deploy:
+    runs-on: self-hosted
+    needs: build
+    steps:
+      - name: Restart backend daemon
+        run: systemctl restart go_backend.service
