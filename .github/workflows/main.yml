@@ -20,5 +20,5 @@ jobs:
     runs-on: self-hosted
     needs: build
     steps:
-      - name: Restart backend daemon
-        run: systemctl restart go_backend.service
+      - name: Restart server
+        run: sudo systemctl restart go_backend.service
