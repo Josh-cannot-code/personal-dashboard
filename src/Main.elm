@@ -100,7 +100,7 @@ generateActivityCard model =
         [
          div [ class "card-body" ]
             [ p [ class "fs-5" ] [ getActivityByIndex model |> text ]
-            , button [ class "btn btn-primary", onClick GenerateRandomNumber ] [ text "New Activity" ]
+            , button [ class "btn btn-primary", onClick GenerateRandomNumber ] [ text "Activity" ]
             ]
         ]
 
