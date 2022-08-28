@@ -82,6 +82,30 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Time.every 1000 Tick
 
+view : Model -> Html Msg
+view model =
+    div [ class "container" ]
+        [ div [ class "row", style "padding" "1ex", style "padding-top" "10ex" ]
+            [ div [ class "col" ]
+                [ displayLinks model.links
+                ]
+            , div [ class "col text-center" ]
+                [ generateActivityCard model ]
+            , div [ class "col text-center" ]
+               [ timeCard model ]
+            ]
+
+        ]
+
+main : Program () Model Msg
+main =
+    Browser.element
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }
+
 timeCard : Model -> Html Msg
 timeCard model =
     let
@@ -129,27 +153,3 @@ getActivityByIndex model =
 
         Nothing ->
             ""
-
-view : Model -> Html Msg
-view model =
-    div [ class "container" ]
-        [ div [ class "row", style "padding" "1ex", style "padding-top" "10ex" ]
-            [ div [ class "col" ]
-                [ displayLinks model.links
-                ]
-            , div [ class "col text-center" ]
-                [ generateActivityCard model ]
-            , div [ class "col text-center" ]
-               [ timeCard model ]
-            ]
-
-        ]
-
-main : Program () Model Msg
-main =
-    Browser.element
-        { init = init
-        , view = view
-        , update = update
-        , subscriptions = subscriptions
-        }
