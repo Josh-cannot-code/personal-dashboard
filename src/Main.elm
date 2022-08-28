@@ -8,6 +8,8 @@ import Html.Events exposing (onClick)
 import Random exposing (..)
 import Time
 import Task
+import Http
+import Json.Decode as Json
 
 
 type alias Link =
@@ -15,7 +17,7 @@ type alias Link =
 
 
 type alias Model =
-    { activities : Array String
+    { activities : Array Activity
     , index : Int
     , links : List Link
     , zone : Time.Zone
@@ -25,13 +27,7 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { activities = Array.fromList
-    [ "Read"
-    , "Bonsai"
-    , "Workout"
-    , "Work on site"
-    , "Guitar"
-    , "Plant watering system" ]
+    ( { activities = Array.fromList []
       , index = 0
       , links =
             [ ( "Calendar", "https://calendar.google.com/calendar/u/2/r" )
@@ -41,7 +37,7 @@ init _ =
       , time = Time.millisToPosix 0
       , zone = Time.utc
       }
-    , Task.perform AdjustTimeZone Time.here
+    , Cmd.batch [Task.perform AdjustTimeZone Time.here, getActivities]
     )
 
 
@@ -50,6 +46,8 @@ type Msg
     | NewRandomNumber Int
     | AdjustTimeZone Time.Zone
     | Tick Time.Posix
+    | SendHttpRequest
+    | DataReceived (Result Http.Error ActivityResponse)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -78,57 +76,16 @@ update msg model =
             , Cmd.none
             )
 
+        SendHttpRequest ->
+            (model, getActivities)
+        DataReceived (Ok actResp) ->
+           ({ model | activities = Array.fromList actResp.activities } , Cmd.none)
+        DataReceived (Err _) ->
+           (model, Cmd.none)
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Time.every 1000 Tick
-
-timeCard : Model -> Html Msg
-timeCard model =
-    let
-        hour = String.fromInt (Time.toHour model.zone model.time)
-        minute = String.fromInt (Time.toMinute model.zone model.time)
-    in
-    div [ class "card"]
-        [
-            div [ class "card-body" ]
-                [p [ class "fs-5" ] [text (hour ++ ":" ++ minute) ]]
-        ]
-
-generateActivityCard : Model -> Html Msg
-generateActivityCard model =
-    div [ class "card" ]
-        [
-         div [ class "card-body" ]
-            [ p [ class "fs-5" ] [ getActivityByIndex model |> text ]
-            , button [ class "btn btn-primary", onClick GenerateRandomNumber ] [ text "New Activity" ]
-            ]
-        ]
-
-
-displayLinks : List Link -> Html Msg
-displayLinks links =
-    let
-        createLi : Link -> Html Msg
-        createLi link =
-            li [ class "nav-item w-50", style "padding" "0.5ex" ]
-                [ a [ class "nav-link active", Tuple.second link |> href, target "_blank" ] [ Tuple.first link |> text ]
-                ]
-    in
-    List.map createLi links
-        |> ul [ class "nav flex-column nav-pills" ]
-
-getActivityByIndex : Model -> String
-getActivityByIndex model =
-    let
-        activity =
-            Array.get model.index model.activities
-    in
-    case activity of
-        Just a ->
-            a
-
-        Nothing ->
-            ""
 
 view : Model -> Html Msg
 view model =
@@ -153,3 +110,82 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
+
+timeCard : Model -> Html Msg
+timeCard model =
+    let
+        hour = String.fromInt (Time.toHour model.zone model.time)
+        minute = String.fromInt (Time.toMinute model.zone model.time)
+    in
+    div [ class "card"]
+        [
+            div [ class "card-body" ]
+                [p [ class "fs-5" ] [text (hour ++ ":" ++ minute) ]]
+        ]
+
+generateActivityCard : Model -> Html Msg
+generateActivityCard model =
+    div [ class "card" ]
+        [
+         div [ class "card-body" ]
+            [ p [ class "fs-5" ] [ getActivityByIndex model |> text ]
+            , button [ class "btn btn-primary", onClick GenerateRandomNumber ] [ text "New Activity" ]
+            ]
+        ]
+
+getActivityByIndex : Model -> String
+getActivityByIndex model =
+    let
+        activity =
+            Array.get model.index model.activities
+    in
+    case activity of
+        Just a ->
+            a.name
+
+        Nothing ->
+            ""
+
+displayLinks : List Link -> Html Msg
+displayLinks links =
+    let
+        createLi : Link -> Html Msg
+        createLi link =
+            li [ class "nav-item w-50", style "padding" "0.5ex" ]
+                [ a [ class "nav-link active", Tuple.second link |> href, target "_blank" ] [ Tuple.first link |> text ]
+                ]
+    in
+    List.map createLi links
+        |> ul [ class "nav flex-column nav-pills" ]
+
+
+
+getActivities : Cmd Msg
+getActivities =
+    Http.get
+        { url = "http://localhost:3001/activities"
+        , expect = Http.expectJson DataReceived activityResponseDecoder
+        }
+
+type alias ActivityResponse =
+    { activities : List Activity }
+
+type alias Activity =
+    { id : String
+    , name : String
+    }
+
+activityResponseDecoder : Json.Decoder ActivityResponse
+activityResponseDecoder =
+    Json.map ActivityResponse
+        (Json.field "activities" activityListDecoder)
+
+activityDecoder : Json.Decoder Activity
+activityDecoder =
+    Json.map2 Activity
+        (Json.field "id" Json.string)
+        (Json.field "name" Json.string)
+
+activityListDecoder : Json.Decoder (List Activity)
+activityListDecoder =
+    Json.list activityDecoder
