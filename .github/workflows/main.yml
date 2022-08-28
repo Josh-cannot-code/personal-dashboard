@@ -14,6 +14,7 @@ jobs:
         run: |
           cd $HOME/personal-dashboard
           git pull
+          go install
           go build backend/main.go
 
   deploy:

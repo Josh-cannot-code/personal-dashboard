@@ -26,6 +26,7 @@ func main() {
 		log.Fatal("failed to execute query", err)
 	}
 	fmt.Println(now)
+
 	rows, err := conn.Query(ctx, "SELECT * FROM activities")
 	if err != nil {
 		log.Fatal(err)
