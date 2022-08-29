@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v4"
@@ -18,6 +19,10 @@ type Activity struct {
 
 type ActivityResponse struct {
 	Activities []*Activity `json:"activities"`
+}
+
+type ActivityPost struct {
+	Name string `json:"name"`
 }
 
 func main() {
@@ -37,7 +42,7 @@ func main() {
 	}
 	fmt.Println(now)
 
-	http.HandleFunc("/activities", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/activities/get", func(w http.ResponseWriter, r *http.Request) {
 		actResp := &ActivityResponse{}
 
 		rows, err := conn.Query(r.Context(), "SELECT * FROM activities")
@@ -69,6 +74,22 @@ func main() {
 			return
 		}
 		_, err = w.Write(actJson)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	})
+
+	http.HandleFunc("/activities/post", func(w http.ResponseWriter, r *http.Request) {
+		var ap ActivityPost
+		err = json.NewDecoder(r.Body).Decode(&ap)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		_, err = conn.Exec(r.Context(), fmt.Sprintf("INSERT INTO activities (id, name) VALUES (DEFAULT, '%s')", strings.ToLower(ap.Name)))
 		if err != nil {
 			log.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)

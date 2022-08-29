@@ -3,13 +3,17 @@ module Main exposing (..)
 import Array exposing (..)
 import Browser
 import Html exposing (..)
-import Html.Attributes exposing (class, href, style, target)
-import Html.Events exposing (onClick)
+import Html.Attributes exposing (class, href, style, target, value, type_)
+import Html.Events exposing (onClick, onInput)
 import Random exposing (..)
 import Time
 import Task
 import Http
-import Json.Decode as Json
+import Activity exposing
+    ( Activity
+    , ActivityResponse
+    , activityResponseDecoder
+    , activityStringEncoder)
 
 
 type alias Link =
@@ -19,6 +23,7 @@ type alias Link =
 type alias Model =
     { activities : Array Activity
     , index : Int
+    , activityForm : String
     , links : List Link
     , zone : Time.Zone
     , time : Time.Posix
@@ -29,6 +34,7 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( { activities = Array.fromList []
       , index = 0
+      , activityForm = ""
       , links =
             [ ( "Calendar", "https://calendar.google.com/calendar/u/2/r" )
             , ( "MyCourses", "https://mycourses2.mcgill.ca/d2l/home" )
@@ -46,8 +52,11 @@ type Msg
     | NewRandomNumber Int
     | AdjustTimeZone Time.Zone
     | Tick Time.Posix
-    | SendHttpRequest
-    | DataReceived (Result Http.Error ActivityResponse)
+    | GetActivitiesRequest
+    | GetActivitiesResponse (Result Http.Error ActivityResponse)
+    | PostActivityRequest String
+    | PostActivityResponse (Result Http.Error String)
+    | UpdateForm String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -76,12 +85,22 @@ update msg model =
             , Cmd.none
             )
 
-        SendHttpRequest ->
+        UpdateForm text ->
+            ( {model | activityForm = text} , Cmd.none )
+
+        GetActivitiesRequest ->
             (model, getActivities)
-        DataReceived (Ok actResp) ->
+        GetActivitiesResponse (Ok actResp) ->
            ({ model | activities = Array.fromList actResp.activities } , Cmd.none)
-        DataReceived (Err _) ->
+        GetActivitiesResponse (Err _) ->
            (model, Cmd.none)
+
+        PostActivityRequest activity ->
+            (model, postNewActivity activity)
+        PostActivityResponse (Ok _) ->
+            ({ model | activityForm = ""}, getActivities)
+        PostActivityResponse (Err _) ->
+            ({ model | activityForm = ""}, Cmd.none)
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -95,7 +114,7 @@ view model =
                 [ displayLinks model.links
                 ]
             , div [ class "col text-center" ]
-                [ generateActivityCard model ]
+                [ activityCard model ]
             , div [ class "col text-center" ]
                [ timeCard model ]
             ]
@@ -123,13 +142,15 @@ timeCard model =
                 [p [ class "fs-5" ] [text (hour ++ ":" ++ minute) ]]
         ]
 
-generateActivityCard : Model -> Html Msg
-generateActivityCard model =
+activityCard : Model -> Html Msg
+activityCard model =
     div [ class "card" ]
         [
          div [ class "card-body" ]
             [ p [ class "fs-5" ] [ getActivityByIndex model |> text ]
             , button [ class "btn btn-primary", onClick GenerateRandomNumber ] [ text "New Activity" ]
+            , input [type_ "text", value model.activityForm, onInput UpdateForm] []
+            , button [ class "btn btn-primary", onClick (PostActivityRequest model.activityForm) ] [text "Add Activity"]
             ]
         ]
 
@@ -163,29 +184,14 @@ displayLinks links =
 getActivities : Cmd Msg
 getActivities =
     Http.get
-        { url = "http://localhost:3001/activities"
-        , expect = Http.expectJson DataReceived activityResponseDecoder
+        { url = "http://localhost:3001/activities/get"
+        , expect = Http.expectJson GetActivitiesResponse activityResponseDecoder
         }
 
-type alias ActivityResponse =
-    { activities : List Activity }
-
-type alias Activity =
-    { id : String
-    , name : String
-    }
-
-activityResponseDecoder : Json.Decoder ActivityResponse
-activityResponseDecoder =
-    Json.map ActivityResponse
-        (Json.field "activities" activityListDecoder)
-
-activityDecoder : Json.Decoder Activity
-activityDecoder =
-    Json.map2 Activity
-        (Json.field "id" Json.string)
-        (Json.field "name" Json.string)
-
-activityListDecoder : Json.Decoder (List Activity)
-activityListDecoder =
-    Json.list activityDecoder
+postNewActivity : String -> Cmd Msg
+postNewActivity activity =
+    Http.post
+        { url = "http://localhost:3001/activities/post"
+        , body = Http.jsonBody (activityStringEncoder activity)
+        , expect = Http.expectString PostActivityResponse
+        }

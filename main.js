@@ -5456,29 +5456,29 @@ var $elm$core$Array$fromList = function (list) {
 		return A3($elm$core$Array$fromListHelp, list, _List_Nil, 0);
 	}
 };
-var $author$project$Main$DataReceived = function (a) {
-	return {$: 'DataReceived', a: a};
+var $author$project$Main$GetActivitiesResponse = function (a) {
+	return {$: 'GetActivitiesResponse', a: a};
 };
-var $author$project$Main$ActivityResponse = function (activities) {
+var $author$project$Activity$ActivityResponse = function (activities) {
 	return {activities: activities};
 };
-var $author$project$Main$Activity = F2(
+var $author$project$Activity$Activity = F2(
 	function (id, name) {
 		return {id: id, name: name};
 	});
 var $elm$json$Json$Decode$field = _Json_decodeField;
 var $elm$json$Json$Decode$string = _Json_decodeString;
-var $author$project$Main$activityDecoder = A3(
+var $author$project$Activity$activityDecoder = A3(
 	$elm$json$Json$Decode$map2,
-	$author$project$Main$Activity,
+	$author$project$Activity$Activity,
 	A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string));
 var $elm$json$Json$Decode$list = _Json_decodeList;
-var $author$project$Main$activityListDecoder = $elm$json$Json$Decode$list($author$project$Main$activityDecoder);
-var $author$project$Main$activityResponseDecoder = A2(
+var $author$project$Activity$activityListDecoder = $elm$json$Json$Decode$list($author$project$Activity$activityDecoder);
+var $author$project$Activity$activityResponseDecoder = A2(
 	$elm$json$Json$Decode$map,
-	$author$project$Main$ActivityResponse,
-	A2($elm$json$Json$Decode$field, 'activities', $author$project$Main$activityListDecoder));
+	$author$project$Activity$ActivityResponse,
+	A2($elm$json$Json$Decode$field, 'activities', $author$project$Activity$activityListDecoder));
 var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
@@ -6268,8 +6268,8 @@ var $elm$http$Http$get = function (r) {
 };
 var $author$project$Main$getActivities = $elm$http$Http$get(
 	{
-		expect: A2($elm$http$Http$expectJson, $author$project$Main$DataReceived, $author$project$Main$activityResponseDecoder),
-		url: 'http://localhost:3001/activities'
+		expect: A2($elm$http$Http$expectJson, $author$project$Main$GetActivitiesResponse, $author$project$Activity$activityResponseDecoder),
+		url: 'http://localhost:3001/activities/get'
 	});
 var $elm$time$Time$Name = function (a) {
 	return {$: 'Name', a: a};
@@ -6292,6 +6292,7 @@ var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
 		{
 			activities: $elm$core$Array$fromList(_List_Nil),
+			activityForm: '',
 			index: 0,
 			links: _List_fromArray(
 				[
@@ -6711,6 +6712,57 @@ var $elm$core$Array$length = function (_v0) {
 	return len;
 };
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $author$project$Main$PostActivityResponse = function (a) {
+	return {$: 'PostActivityResponse', a: a};
+};
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $author$project$Activity$activityStringEncoder = function (activity) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'name',
+				$elm$json$Json$Encode$string(activity))
+			]));
+};
+var $elm$http$Http$expectString = function (toMsg) {
+	return A2(
+		$elm$http$Http$expectStringResponse,
+		toMsg,
+		$elm$http$Http$resolve($elm$core$Result$Ok));
+};
+var $elm$http$Http$jsonBody = function (value) {
+	return A2(
+		_Http_pair,
+		'application/json',
+		A2($elm$json$Json$Encode$encode, 0, value));
+};
+var $elm$http$Http$post = function (r) {
+	return $elm$http$Http$request(
+		{body: r.body, expect: r.expect, headers: _List_Nil, method: 'POST', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
+};
+var $author$project$Main$postNewActivity = function (activity) {
+	return $elm$http$Http$post(
+		{
+			body: $elm$http$Http$jsonBody(
+				$author$project$Activity$activityStringEncoder(activity)),
+			expect: $elm$http$Http$expectString($author$project$Main$PostActivityResponse),
+			url: 'http://localhost:3001/activities/post'
+		});
+};
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -6745,9 +6797,16 @@ var $author$project$Main$update = F2(
 						model,
 						{zone: newZone}),
 					$elm$core$Platform$Cmd$none);
-			case 'SendHttpRequest':
+			case 'UpdateForm':
+				var text = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{activityForm: text}),
+					$elm$core$Platform$Cmd$none);
+			case 'GetActivitiesRequest':
 				return _Utils_Tuple2(model, $author$project$Main$getActivities);
-			default:
+			case 'GetActivitiesResponse':
 				if (msg.a.$ === 'Ok') {
 					var actResp = msg.a.a;
 					return _Utils_Tuple2(
@@ -6760,9 +6819,35 @@ var $author$project$Main$update = F2(
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
+			case 'PostActivityRequest':
+				var activity = msg.a;
+				return _Utils_Tuple2(
+					model,
+					$author$project$Main$postNewActivity(activity));
+			default:
+				if (msg.a.$ === 'Ok') {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{activityForm: ''}),
+						$author$project$Main$getActivities);
+				} else {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{activityForm: ''}),
+						$elm$core$Platform$Cmd$none);
+				}
 		}
 	});
-var $elm$json$Json$Encode$string = _Json_wrap;
+var $author$project$Main$GenerateRandomNumber = {$: 'GenerateRandomNumber'};
+var $author$project$Main$PostActivityRequest = function (a) {
+	return {$: 'PostActivityRequest', a: a};
+};
+var $author$project$Main$UpdateForm = function (a) {
+	return {$: 'UpdateForm', a: a};
+};
+var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
 		return A2(
@@ -6771,60 +6856,7 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
-var $elm$html$Html$a = _VirtualDom_node('a');
-var $elm$html$Html$Attributes$href = function (url) {
-	return A2(
-		$elm$html$Html$Attributes$stringProperty,
-		'href',
-		_VirtualDom_noJavaScriptUri(url));
-};
-var $elm$html$Html$li = _VirtualDom_node('li');
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
-var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
-var $elm$html$Html$Attributes$target = $elm$html$Html$Attributes$stringProperty('target');
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $elm$html$Html$ul = _VirtualDom_node('ul');
-var $author$project$Main$displayLinks = function (links) {
-	var createLi = function (link) {
-		return A2(
-			$elm$html$Html$li,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('nav-item w-50'),
-					A2($elm$html$Html$Attributes$style, 'padding', '0.5ex')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$a,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$class('nav-link active'),
-							$elm$html$Html$Attributes$href(link.b),
-							$elm$html$Html$Attributes$target('_blank')
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text(link.a)
-						]))
-				]));
-	};
-	return A2(
-		$elm$html$Html$ul,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('nav flex-column nav-pills')
-			]),
-		A2($elm$core$List$map, createLi, links));
-};
 var $elm$html$Html$div = _VirtualDom_node('div');
-var $author$project$Main$GenerateRandomNumber = {$: 'GenerateRandomNumber'};
-var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$core$Array$bitMask = 4294967295 >>> (32 - $elm$core$Array$shiftStep);
 var $elm$core$Basics$ge = _Utils_ge;
 var $elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
@@ -6874,6 +6906,7 @@ var $author$project$Main$getActivityByIndex = function (model) {
 		return '';
 	}
 };
+var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -6891,8 +6924,43 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
 var $elm$html$Html$p = _VirtualDom_node('p');
-var $author$project$Main$generateActivityCard = function (model) {
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $author$project$Main$activityCard = function (model) {
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
@@ -6930,9 +6998,79 @@ var $author$project$Main$generateActivityCard = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$text('New Activity')
+							])),
+						A2(
+						$elm$html$Html$input,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$type_('text'),
+								$elm$html$Html$Attributes$value(model.activityForm),
+								$elm$html$Html$Events$onInput($author$project$Main$UpdateForm)
+							]),
+						_List_Nil),
+						A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('btn btn-primary'),
+								$elm$html$Html$Events$onClick(
+								$author$project$Main$PostActivityRequest(model.activityForm))
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Add Activity')
 							]))
 					]))
 			]));
+};
+var $elm$html$Html$a = _VirtualDom_node('a');
+var $elm$html$Html$Attributes$href = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'href',
+		_VirtualDom_noJavaScriptUri(url));
+};
+var $elm$html$Html$li = _VirtualDom_node('li');
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $elm$html$Html$Attributes$target = $elm$html$Html$Attributes$stringProperty('target');
+var $elm$html$Html$ul = _VirtualDom_node('ul');
+var $author$project$Main$displayLinks = function (links) {
+	var createLi = function (link) {
+		return A2(
+			$elm$html$Html$li,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('nav-item w-50'),
+					A2($elm$html$Html$Attributes$style, 'padding', '0.5ex')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$a,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('nav-link active'),
+							$elm$html$Html$Attributes$href(link.b),
+							$elm$html$Html$Attributes$target('_blank')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(link.a)
+						]))
+				]));
+	};
+	return A2(
+		$elm$html$Html$ul,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('nav flex-column nav-pills')
+			]),
+		A2($elm$core$List$map, createLi, links));
 };
 var $elm$time$Time$flooredDiv = F2(
 	function (numerator, denominator) {
@@ -7063,7 +7201,7 @@ var $author$project$Main$view = function (model) {
 							]),
 						_List_fromArray(
 							[
-								$author$project$Main$generateActivityCard(model)
+								$author$project$Main$activityCard(model)
 							])),
 						A2(
 						$elm$html$Html$div,
