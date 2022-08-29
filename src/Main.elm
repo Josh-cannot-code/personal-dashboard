@@ -13,7 +13,7 @@ import Activity exposing
     ( Activity
     , ActivityResponse
     , activityResponseDecoder
-    , activityStringEncoder)
+    , activityPostEncoder)
 
 
 type alias Link =
@@ -54,9 +54,10 @@ type Msg
     | Tick Time.Posix
     | GetActivitiesRequest
     | GetActivitiesResponse (Result Http.Error ActivityResponse)
-    | PostActivityRequest String
+    | InsertActivityRequest Activity
     | PostActivityResponse (Result Http.Error String)
     | UpdateForm String
+    | DeleteActivityRequest Activity
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -94,13 +95,14 @@ update msg model =
            ({ model | activities = Array.fromList actResp.activities } , Cmd.none)
         GetActivitiesResponse (Err _) ->
            (model, Cmd.none)
-
-        PostActivityRequest activity ->
-            (model, postNewActivity activity)
+        InsertActivityRequest activity ->
+            (model, postActivityRequest activity "insert")
         PostActivityResponse (Ok _) ->
             ({ model | activityForm = ""}, getActivities)
         PostActivityResponse (Err _) ->
             ({ model | activityForm = ""}, Cmd.none)
+        DeleteActivityRequest activity ->
+            (model, postActivityRequest activity "delete")
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -113,7 +115,7 @@ view model =
             [ div [ class "col" ]
                 [ displayLinks model.links
                 ]
-            , div [ class "col text-center" ]
+            , div [ class "col" ]
                 [ activityCard model ]
             , div [ class "col text-center" ]
                [ timeCard model ]
@@ -146,15 +148,31 @@ activityCard : Model -> Html Msg
 activityCard model =
     div [ class "card" ]
         [
-         div [ class "card-body" ]
+         div [ class "card-body text-center" ]
             [ p [ class "fs-5" ] [ getActivityByIndex model |> text ]
             , button [ class "btn btn-primary", onClick GenerateRandomNumber ] [ text "New Activity" ]
             , div [class "input-group", style "padding" "0.5ex"] [
              input [class "form-control", type_ "text", value model.activityForm, onInput UpdateForm] []
              ]
-            , button [ class "btn btn-primary", onClick (PostActivityRequest model.activityForm) ] [text "Add Activity"]
+            , button [ class "btn btn-primary", onClick (InsertActivityRequest { name = model.activityForm, id = ""}) ] [text "Add Activity"]
+            , listActivities model
             ]
         ]
+
+listActivities : Model -> Html Msg
+listActivities model =
+    let
+        listElement : Activity -> Html Msg
+        listElement a =
+            li [class "list-group-item"] [
+                text a.name
+                , button [ class "btn btn-sm btn-danger float-end", onClick (DeleteActivityRequest a) ] [text "Delete"]
+             ]
+    in
+    div [style "padding" "0.5ex"] [
+        List.map listElement (Array.toList model.activities)
+        |> ul [class "list-group-flush text-start justify-content-between"]
+    ]
 
 getActivityByIndex : Model -> String
 getActivityByIndex model =
@@ -190,10 +208,10 @@ getActivities =
         , expect = Http.expectJson GetActivitiesResponse activityResponseDecoder
         }
 
-postNewActivity : String -> Cmd Msg
-postNewActivity activity =
+postActivityRequest : Activity -> String -> Cmd Msg
+postActivityRequest activity action =
     Http.post
         { url = "http://localhost:3001/activities/post"
-        , body = Http.jsonBody (activityStringEncoder activity)
+        , body = Http.jsonBody (activityPostEncoder activity action)
         , expect = Http.expectString PostActivityResponse
         }

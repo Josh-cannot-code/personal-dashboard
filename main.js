@@ -6729,15 +6729,31 @@ var $elm$json$Json$Encode$object = function (pairs) {
 			pairs));
 };
 var $elm$json$Json$Encode$string = _Json_wrap;
-var $author$project$Activity$activityStringEncoder = function (activity) {
+var $author$project$Activity$activityEncoder = function (activity) {
 	return $elm$json$Json$Encode$object(
 		_List_fromArray(
 			[
 				_Utils_Tuple2(
 				'name',
-				$elm$json$Json$Encode$string(activity))
+				$elm$json$Json$Encode$string(activity.name)),
+				_Utils_Tuple2(
+				'id',
+				$elm$json$Json$Encode$string(activity.id))
 			]));
 };
+var $author$project$Activity$activityPostEncoder = F2(
+	function (activity, action) {
+		return $elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'activity',
+					$author$project$Activity$activityEncoder(activity)),
+					_Utils_Tuple2(
+					'action',
+					$elm$json$Json$Encode$string(action))
+				]));
+	});
 var $elm$http$Http$expectString = function (toMsg) {
 	return A2(
 		$elm$http$Http$expectStringResponse,
@@ -6754,15 +6770,16 @@ var $elm$http$Http$post = function (r) {
 	return $elm$http$Http$request(
 		{body: r.body, expect: r.expect, headers: _List_Nil, method: 'POST', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
-var $author$project$Main$postNewActivity = function (activity) {
-	return $elm$http$Http$post(
-		{
-			body: $elm$http$Http$jsonBody(
-				$author$project$Activity$activityStringEncoder(activity)),
-			expect: $elm$http$Http$expectString($author$project$Main$PostActivityResponse),
-			url: 'http://localhost:3001/activities/post'
-		});
-};
+var $author$project$Main$postActivityRequest = F2(
+	function (activity, action) {
+		return $elm$http$Http$post(
+			{
+				body: $elm$http$Http$jsonBody(
+					A2($author$project$Activity$activityPostEncoder, activity, action)),
+				expect: $elm$http$Http$expectString($author$project$Main$PostActivityResponse),
+				url: 'http://localhost:3001/activities/post'
+			});
+	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -6819,12 +6836,12 @@ var $author$project$Main$update = F2(
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
-			case 'PostActivityRequest':
+			case 'InsertActivityRequest':
 				var activity = msg.a;
 				return _Utils_Tuple2(
 					model,
-					$author$project$Main$postNewActivity(activity));
-			default:
+					A2($author$project$Main$postActivityRequest, activity, 'insert'));
+			case 'PostActivityResponse':
 				if (msg.a.$ === 'Ok') {
 					return _Utils_Tuple2(
 						_Utils_update(
@@ -6838,11 +6855,16 @@ var $author$project$Main$update = F2(
 							{activityForm: ''}),
 						$elm$core$Platform$Cmd$none);
 				}
+			default:
+				var activity = msg.a;
+				return _Utils_Tuple2(
+					model,
+					A2($author$project$Main$postActivityRequest, activity, 'delete'));
 		}
 	});
 var $author$project$Main$GenerateRandomNumber = {$: 'GenerateRandomNumber'};
-var $author$project$Main$PostActivityRequest = function (a) {
-	return {$: 'PostActivityRequest', a: a};
+var $author$project$Main$InsertActivityRequest = function (a) {
+	return {$: 'InsertActivityRequest', a: a};
 };
 var $author$project$Main$UpdateForm = function (a) {
 	return {$: 'UpdateForm', a: a};
@@ -6907,6 +6929,10 @@ var $author$project$Main$getActivityByIndex = function (model) {
 	}
 };
 var $elm$html$Html$input = _VirtualDom_node('input');
+var $author$project$Main$DeleteActivityRequest = function (a) {
+	return {$: 'DeleteActivityRequest', a: a};
+};
+var $elm$html$Html$li = _VirtualDom_node('li');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -6923,6 +6949,56 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		$elm$html$Html$Events$on,
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
+};
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$ul = _VirtualDom_node('ul');
+var $author$project$Main$listActivities = function (model) {
+	var listElement = function (a) {
+		return A2(
+			$elm$html$Html$li,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('list-group-item')
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text(a.name),
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('btn btn-sm btn-danger float-end'),
+							$elm$html$Html$Events$onClick(
+							$author$project$Main$DeleteActivityRequest(a))
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Delete')
+						]))
+				]));
+	};
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'padding', '0.5ex')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$ul,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('list-group-flush text-start justify-content-between')
+					]),
+				A2(
+					$elm$core$List$map,
+					listElement,
+					$elm$core$Array$toList(model.activities)))
+			]));
 };
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
@@ -6956,10 +7032,6 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
 var $elm$html$Html$p = _VirtualDom_node('p');
-var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$Main$activityCard = function (model) {
@@ -6975,7 +7047,7 @@ var $author$project$Main$activityCard = function (model) {
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('card-body')
+						$elm$html$Html$Attributes$class('card-body text-center')
 					]),
 				_List_fromArray(
 					[
@@ -7027,12 +7099,14 @@ var $author$project$Main$activityCard = function (model) {
 							[
 								$elm$html$Html$Attributes$class('btn btn-primary'),
 								$elm$html$Html$Events$onClick(
-								$author$project$Main$PostActivityRequest(model.activityForm))
+								$author$project$Main$InsertActivityRequest(
+									{id: '', name: model.activityForm}))
 							]),
 						_List_fromArray(
 							[
 								$elm$html$Html$text('Add Activity')
-							]))
+							])),
+						$author$project$Main$listActivities(model)
 					]))
 			]));
 };
@@ -7043,13 +7117,11 @@ var $elm$html$Html$Attributes$href = function (url) {
 		'href',
 		_VirtualDom_noJavaScriptUri(url));
 };
-var $elm$html$Html$li = _VirtualDom_node('li');
 var $elm$core$Tuple$second = function (_v0) {
 	var y = _v0.b;
 	return y;
 };
 var $elm$html$Html$Attributes$target = $elm$html$Html$Attributes$stringProperty('target');
-var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $author$project$Main$displayLinks = function (links) {
 	var createLi = function (link) {
 		return A2(
@@ -7208,7 +7280,7 @@ var $author$project$Main$view = function (model) {
 						$elm$html$Html$div,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('col text-center')
+								$elm$html$Html$Attributes$class('col')
 							]),
 						_List_fromArray(
 							[

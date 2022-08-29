@@ -22,7 +22,8 @@ type ActivityResponse struct {
 }
 
 type ActivityPost struct {
-	Name string `json:"name"`
+	Activity Activity `json:"activity"`
+	Action   string   `json:"action"` // either insert or delete
 }
 
 func main() {
@@ -89,11 +90,22 @@ func main() {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		_, err = conn.Exec(r.Context(), fmt.Sprintf("INSERT INTO activities (id, name) VALUES (DEFAULT, '%s')", strings.ToLower(ap.Name)))
-		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+		switch ap.Action {
+		case "insert":
+			// TODO: make this unique?
+			_, err = conn.Exec(r.Context(), fmt.Sprintf("INSERT INTO activities (id, name) VALUES (DEFAULT, '%s')", strings.ToLower(ap.Activity.Name)))
+			if err != nil {
+				log.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+		case "delete":
+			_, err = conn.Exec(r.Context(), fmt.Sprintf("DELETE FROM activities WHERE id = '%s'", strings.ToLower(ap.Activity.Id)))
+			if err != nil {
+				log.Println(err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
 		}
 	})
 

@@ -11,9 +11,20 @@ type alias Activity =
     , name : String
     }
 
-activityStringEncoder : String -> JE.Value
-activityStringEncoder activity =
-    JE.object [("name", JE.string activity)]
+{- TODO this encoding an activity and action, need seperate encoder for currency -}
+activityPostEncoder : Activity -> String -> JE.Value
+activityPostEncoder activity action =
+    JE.object [
+        ("activity", activityEncoder activity),
+        ("action", JE.string action)
+    ]
+
+activityEncoder : Activity -> JE.Value
+activityEncoder activity =
+    JE.object [
+        ("name", JE.string activity.name),
+        ("id", JE.string activity.id)
+    ]
 
 activityResponseDecoder : JD.Decoder ActivityResponse
 activityResponseDecoder =
