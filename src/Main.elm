@@ -149,7 +149,9 @@ activityCard model =
          div [ class "card-body" ]
             [ p [ class "fs-5" ] [ getActivityByIndex model |> text ]
             , button [ class "btn btn-primary", onClick GenerateRandomNumber ] [ text "New Activity" ]
-            , input [type_ "text", value model.activityForm, onInput UpdateForm] []
+            , div [class "input-group", style "padding" "0.5ex"] [
+             input [class "form-control", type_ "text", value model.activityForm, onInput UpdateForm] []
+             ]
             , button [ class "btn btn-primary", onClick (PostActivityRequest model.activityForm) ] [text "Add Activity"]
             ]
         ]
