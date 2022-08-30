@@ -6266,11 +6266,13 @@ var $elm$http$Http$get = function (r) {
 	return $elm$http$Http$request(
 		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
-var $author$project$Main$getActivities = $elm$http$Http$get(
-	{
-		expect: A2($elm$http$Http$expectJson, $author$project$Main$GetActivitiesResponse, $author$project$Activity$activityResponseDecoder),
-		url: 'http://localhost:3001/activities/get'
-	});
+var $author$project$Main$getActivities = function (url) {
+	return $elm$http$Http$get(
+		{
+			expect: A2($elm$http$Http$expectJson, $author$project$Main$GetActivitiesResponse, $author$project$Activity$activityResponseDecoder),
+			url: 'http://' + (url + '/activities/get')
+		});
+};
 var $elm$time$Time$Name = function (a) {
 	return {$: 'Name', a: a};
 };
@@ -6288,11 +6290,12 @@ var $elm$time$Time$Posix = function (a) {
 };
 var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
 var $elm$time$Time$utc = A2($elm$time$Time$Zone, 0, _List_Nil);
-var $author$project$Main$init = function (_v0) {
+var $author$project$Main$init = function (url) {
 	return _Utils_Tuple2(
 		{
 			activities: $elm$core$Array$fromList(_List_Nil),
 			activityForm: '',
+			apiUrl: url,
 			index: 0,
 			links: _List_fromArray(
 				[
@@ -6307,7 +6310,7 @@ var $author$project$Main$init = function (_v0) {
 			_List_fromArray(
 				[
 					A2($elm$core$Task$perform, $author$project$Main$AdjustTimeZone, $elm$time$Time$here),
-					$author$project$Main$getActivities
+					$author$project$Main$getActivities(url)
 				])));
 };
 var $author$project$Main$Tick = function (a) {
@@ -6770,14 +6773,14 @@ var $elm$http$Http$post = function (r) {
 	return $elm$http$Http$request(
 		{body: r.body, expect: r.expect, headers: _List_Nil, method: 'POST', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
-var $author$project$Main$postActivityRequest = F2(
-	function (activity, action) {
+var $author$project$Main$postActivityRequest = F3(
+	function (activity, action, url) {
 		return $elm$http$Http$post(
 			{
 				body: $elm$http$Http$jsonBody(
 					A2($author$project$Activity$activityPostEncoder, activity, action)),
 				expect: $elm$http$Http$expectString($author$project$Main$PostActivityResponse),
-				url: 'http://localhost:3001/activities/post'
+				url: 'http://' + (url + '/activities/post')
 			});
 	});
 var $author$project$Main$update = F2(
@@ -6822,7 +6825,9 @@ var $author$project$Main$update = F2(
 						{activityForm: text}),
 					$elm$core$Platform$Cmd$none);
 			case 'GetActivitiesRequest':
-				return _Utils_Tuple2(model, $author$project$Main$getActivities);
+				return _Utils_Tuple2(
+					model,
+					$author$project$Main$getActivities(model.apiUrl));
 			case 'GetActivitiesResponse':
 				if (msg.a.$ === 'Ok') {
 					var actResp = msg.a.a;
@@ -6840,14 +6845,14 @@ var $author$project$Main$update = F2(
 				var activity = msg.a;
 				return _Utils_Tuple2(
 					model,
-					A2($author$project$Main$postActivityRequest, activity, 'insert'));
+					A3($author$project$Main$postActivityRequest, activity, 'insert', model.apiUrl));
 			case 'PostActivityResponse':
 				if (msg.a.$ === 'Ok') {
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{activityForm: ''}),
-						$author$project$Main$getActivities);
+						$author$project$Main$getActivities(model.apiUrl));
 				} else {
 					return _Utils_Tuple2(
 						_Utils_update(
@@ -6859,7 +6864,7 @@ var $author$project$Main$update = F2(
 				var activity = msg.a;
 				return _Utils_Tuple2(
 					model,
-					A2($author$project$Main$postActivityRequest, activity, 'delete'));
+					A3($author$project$Main$postActivityRequest, activity, 'delete', model.apiUrl));
 		}
 	});
 var $author$project$Main$GenerateRandomNumber = {$: 'GenerateRandomNumber'};
@@ -7301,5 +7306,4 @@ var $author$project$Main$view = function (model) {
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
 	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
-_Platform_export({'Main':{'init':$author$project$Main$main(
-	$elm$json$Json$Decode$succeed(_Utils_Tuple0))(0)}});}(this));
+_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$string)(0)}});}(this));
