@@ -27,11 +27,12 @@ type alias Model =
     , links : List Link
     , zone : Time.Zone
     , time : Time.Posix
+    , apiUrl: String
     }
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
+init : String -> ( Model, Cmd Msg )
+init url =
     ( { activities = Array.fromList []
       , index = 0
       , activityForm = ""
@@ -42,8 +43,9 @@ init _ =
             ]
       , time = Time.millisToPosix 0
       , zone = Time.utc
+      , apiUrl = url
       }
-    , Cmd.batch [Task.perform AdjustTimeZone Time.here, getActivities]
+    , Cmd.batch [Task.perform AdjustTimeZone Time.here, getActivities url]
     )
 
 
@@ -90,19 +92,19 @@ update msg model =
             ( {model | activityForm = text} , Cmd.none )
 
         GetActivitiesRequest ->
-            (model, getActivities)
+            (model, getActivities model.apiUrl)
         GetActivitiesResponse (Ok actResp) ->
            ({ model | activities = Array.fromList actResp.activities } , Cmd.none)
         GetActivitiesResponse (Err _) ->
            (model, Cmd.none)
         InsertActivityRequest activity ->
-            (model, postActivityRequest activity "insert")
+            (model, postActivityRequest activity "insert" model.apiUrl)
         PostActivityResponse (Ok _) ->
-            ({ model | activityForm = ""}, getActivities)
+            ({ model | activityForm = ""}, getActivities model.apiUrl)
         PostActivityResponse (Err _) ->
             ({ model | activityForm = ""}, Cmd.none)
         DeleteActivityRequest activity ->
-            (model, postActivityRequest activity "delete")
+            (model, postActivityRequest activity "delete" model.apiUrl)
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -123,7 +125,7 @@ view model =
 
         ]
 
-main : Program () Model Msg
+main : Program String Model Msg
 main =
     Browser.element
         { init = init
@@ -199,19 +201,17 @@ displayLinks links =
     List.map createLi links
         |> ul [ class "nav flex-column nav-pills" ]
 
-
-
-getActivities : Cmd Msg
-getActivities =
+getActivities : String -> Cmd Msg
+getActivities url =
     Http.get
-        { url = "http://localhost:3001/activities/get"
+        { url = "http://" ++ url ++ "/activities/get"
         , expect = Http.expectJson GetActivitiesResponse activityResponseDecoder
         }
 
-postActivityRequest : Activity -> String -> Cmd Msg
-postActivityRequest activity action =
+postActivityRequest : Activity -> String -> String -> Cmd Msg
+postActivityRequest activity action url=
     Http.post
-        { url = "http://localhost:3001/activities/post"
+        { url = "http://" ++ url ++ "/activities/post"
         , body = Http.jsonBody (activityPostEncoder activity action)
         , expect = Http.expectString PostActivityResponse
         }

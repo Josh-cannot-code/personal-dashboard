@@ -1,16 +1,22 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	_ "embed"
 	"encoding/json"
 	"fmt"
+	"github.com/jackc/pgx/v4"
+	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
-
-	"github.com/jackc/pgx/v4"
 )
+
+//go:embed index.html.tmpl
+var indexTmpl string
 
 type Activity struct {
 	Id   string `json:"id"`
@@ -26,22 +32,56 @@ type ActivityPost struct {
 	Action   string   `json:"action"` // either insert or delete
 }
 
+type templateFiller struct {
+	ApiUrl string
+}
+
 func main() {
 	// Initialize database
-	dsn := "postgresql://joshd:kEiF1hgBt3JdE3IMSqyk7g@free-tier11.gcp-us-east1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full&options=--cluster%3Dpersonal-db-1796"
+	dsn := "postgresql://" + os.Getenv("COCKROACH_KEY") + "@free-tier11.gcp-us-east1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full&options=--cluster%3Dpersonal-db-1796"
 	ctx := context.Background()
 	conn, err := pgx.Connect(ctx, dsn)
 	defer conn.Close(context.Background())
 	if err != nil {
 		log.Fatal("failed to connect database", err)
 	}
-
 	var now time.Time
 	err = conn.QueryRow(ctx, "SELECT NOW()").Scan(&now)
 	if err != nil {
 		log.Fatal("failed to execute query", err)
 	}
 	fmt.Println(now)
+
+	// Wire env vars to the frontend
+	var indexHtml bytes.Buffer
+	templ, err := template.New("indexTmpl").Parse(indexTmpl)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = templ.Execute(&indexHtml, templateFiller{ApiUrl: os.Getenv("API_URL")})
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = os.Chdir("../")
+	if err != nil {
+		log.Fatal(err)
+	}
+	f, err := os.Create("index.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = f.Write(indexHtml.Bytes())
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = f.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = os.Chdir("backend")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	http.HandleFunc("/activities/get", func(w http.ResponseWriter, r *http.Request) {
 		actResp := &ActivityResponse{}
