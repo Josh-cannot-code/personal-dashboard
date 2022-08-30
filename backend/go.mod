@@ -2,7 +2,10 @@ module github.com/josh-cannot-code/backend
 
 go 1.18
 
-require github.com/jackc/pgx/v4 v4.17.1
+require (
+	github.com/jackc/pgx/v4 v4.17.1
+	github.com/joho/godotenv v1.4.0
+)
 
 require (
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect

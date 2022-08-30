@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/jackc/pgx/v4"
+	"github.com/joho/godotenv"
 	"html/template"
 	"log"
 	"net/http"
@@ -37,6 +38,10 @@ type templateFiller struct {
 }
 
 func main() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal(err)
+	}
 	// Initialize database
 	dsn := "postgresql://" + os.Getenv("COCKROACH_KEY") + "@free-tier11.gcp-us-east1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full&options=--cluster%3Dpersonal-db-1796"
 	ctx := context.Background()
