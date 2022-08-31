@@ -7926,34 +7926,12 @@ var $ryannhg$date_format$DateFormat$formatWithLanguage = F4(
 				tokens));
 	});
 var $ryannhg$date_format$DateFormat$format = $ryannhg$date_format$DateFormat$formatWithLanguage($ryannhg$date_format$DateFormat$Language$english);
+var $ryannhg$date_format$DateFormat$HourMilitaryFixed = {$: 'HourMilitaryFixed'};
+var $ryannhg$date_format$DateFormat$hourMilitaryFixed = $ryannhg$date_format$DateFormat$HourMilitaryFixed;
+var $ryannhg$date_format$DateFormat$MinuteFixed = {$: 'MinuteFixed'};
+var $ryannhg$date_format$DateFormat$minuteFixed = $ryannhg$date_format$DateFormat$MinuteFixed;
 var $ryannhg$date_format$DateFormat$MonthNameFull = {$: 'MonthNameFull'};
 var $ryannhg$date_format$DateFormat$monthNameFull = $ryannhg$date_format$DateFormat$MonthNameFull;
-var $elm$core$String$cons = _String_cons;
-var $elm$core$String$fromChar = function (_char) {
-	return A2($elm$core$String$cons, _char, '');
-};
-var $elm$core$Bitwise$shiftRightBy = _Bitwise_shiftRightBy;
-var $elm$core$String$repeatHelp = F3(
-	function (n, chunk, result) {
-		return (n <= 0) ? result : A3(
-			$elm$core$String$repeatHelp,
-			n >> 1,
-			_Utils_ap(chunk, chunk),
-			(!(n & 1)) ? result : _Utils_ap(result, chunk));
-	});
-var $elm$core$String$repeat = F2(
-	function (n, chunk) {
-		return A3($elm$core$String$repeatHelp, n, chunk, '');
-	});
-var $elm$core$String$padLeft = F3(
-	function (n, _char, string) {
-		return _Utils_ap(
-			A2(
-				$elm$core$String$repeat,
-				n - $elm$core$String$length(string),
-				$elm$core$String$fromChar(_char)),
-			string);
-	});
 var $ryannhg$date_format$DateFormat$Text = function (a) {
 	return {$: 'Text', a: a};
 };
@@ -7961,16 +7939,17 @@ var $ryannhg$date_format$DateFormat$text = $ryannhg$date_format$DateFormat$Text;
 var $ryannhg$date_format$DateFormat$YearNumber = {$: 'YearNumber'};
 var $ryannhg$date_format$DateFormat$yearNumber = $ryannhg$date_format$DateFormat$YearNumber;
 var $author$project$Main$timeCard = function (model) {
-	var month = A2($elm$time$Time$toMonth, model.zone, model.time);
-	var minute = A3(
-		$elm$core$String$padLeft,
-		2,
-		_Utils_chr('0'),
-		$elm$core$String$fromInt(
-			A2($elm$time$Time$toMinute, model.zone, model.time)));
-	var hour = $elm$core$String$fromInt(
-		A2($elm$time$Time$toHour, model.zone, model.time));
-	var formatted = A3(
+	var timeOfDay = A3(
+		$ryannhg$date_format$DateFormat$format,
+		_List_fromArray(
+			[
+				$ryannhg$date_format$DateFormat$hourMilitaryFixed,
+				$ryannhg$date_format$DateFormat$text(':'),
+				$ryannhg$date_format$DateFormat$minuteFixed
+			]),
+		model.zone,
+		model.time);
+	var date = A3(
 		$ryannhg$date_format$DateFormat$format,
 		_List_fromArray(
 			[
@@ -7982,8 +7961,6 @@ var $author$project$Main$timeCard = function (model) {
 			]),
 		model.zone,
 		model.time);
-	var day = $elm$core$String$fromInt(
-		A2($elm$time$Time$toDay, model.zone, model.time));
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
@@ -8008,7 +7985,7 @@ var $author$project$Main$timeCard = function (model) {
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text(hour + (':' + minute))
+								$elm$html$Html$text(timeOfDay)
 							])),
 						A2(
 						$elm$html$Html$p,
@@ -8018,7 +7995,7 @@ var $author$project$Main$timeCard = function (model) {
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text(formatted)
+								$elm$html$Html$text(date)
 							]))
 					]))
 			]));

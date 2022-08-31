@@ -1,20 +1,22 @@
 module Main exposing (..)
 
+import Activity
+    exposing
+        ( Activity
+        , ActivityResponse
+        , activityPostEncoder
+        , activityResponseDecoder
+        )
 import Array exposing (..)
 import Browser
-import Html exposing (..)
-import Html.Attributes exposing (class, href, style, target, value, type_)
-import Html.Events exposing (onClick, onInput)
-import Random exposing (..)
-import Time
-import Task
-import Http
-import Activity exposing
-    ( Activity
-    , ActivityResponse
-    , activityResponseDecoder
-    , activityPostEncoder)
 import DateFormat
+import Html exposing (..)
+import Html.Attributes exposing (class, href, style, target, type_, value)
+import Html.Events exposing (onClick, onInput)
+import Http
+import Random exposing (..)
+import Task
+import Time
 
 
 type alias Link =
@@ -28,7 +30,7 @@ type alias Model =
     , links : List Link
     , zone : Time.Zone
     , time : Time.Posix
-    , apiUrl: String
+    , apiUrl : String
     }
 
 
@@ -46,7 +48,7 @@ init url =
       , zone = Time.utc
       , apiUrl = url
       }
-    , Cmd.batch [Task.perform AdjustTimeZone Time.here, getActivities url]
+    , Cmd.batch [ Task.perform AdjustTimeZone Time.here, getActivities url ]
     )
 
 
@@ -80,7 +82,7 @@ update msg model =
             )
 
         Tick newTime ->
-            ( {model | time = newTime}
+            ( { model | time = newTime }
             , Cmd.none
             )
 
@@ -90,26 +92,34 @@ update msg model =
             )
 
         UpdateForm text ->
-            ( {model | activityForm = text} , Cmd.none )
+            ( { model | activityForm = text }, Cmd.none )
 
         GetActivitiesRequest ->
-            (model, getActivities model.apiUrl)
+            ( model, getActivities model.apiUrl )
+
         GetActivitiesResponse (Ok actResp) ->
-           ({ model | activities = Array.fromList actResp.activities } , Cmd.none)
+            ( { model | activities = Array.fromList actResp.activities }, Cmd.none )
+
         GetActivitiesResponse (Err _) ->
-           (model, Cmd.none)
+            ( model, Cmd.none )
+
         InsertActivityRequest activity ->
-            (model, postActivityRequest activity "insert" model.apiUrl)
+            ( model, postActivityRequest activity "insert" model.apiUrl )
+
         PostActivityResponse (Ok _) ->
-            ({ model | activityForm = ""}, getActivities model.apiUrl)
+            ( { model | activityForm = "" }, getActivities model.apiUrl )
+
         PostActivityResponse (Err _) ->
-            ({ model | activityForm = ""}, Cmd.none)
+            ( { model | activityForm = "" }, Cmd.none )
+
         DeleteActivityRequest activity ->
-            (model, postActivityRequest activity "delete" model.apiUrl)
+            ( model, postActivityRequest activity "delete" model.apiUrl )
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Time.every 1000 Tick
+
 
 view : Model -> Html Msg
 view model =
@@ -121,10 +131,10 @@ view model =
             , div [ class "col" ]
                 [ activityCard model ]
             , div [ class "col text-center" ]
-               [ timeCard model ]
+                [ timeCard model ]
             ]
-
         ]
+
 
 main : Program String Model Msg
 main =
@@ -135,22 +145,20 @@ main =
         , subscriptions = subscriptions
         }
 
+
 timeCard : Model -> Html Msg
 timeCard model =
     let
-        hour =
-            Time.toHour model.zone model.time
-            |> String.fromInt
-        minute =
-            Time.toMinute model.zone model.time
-            |> String.fromInt
-            |> String.padLeft 2 '0'
-        day =
-            Time.toDay model.zone model.time
-            |> String.fromInt
-        month =
-            Time.toMonth model.zone model.time
-        formatted =
+        timeOfDay =
+            DateFormat.format
+                [ DateFormat.hourMilitaryFixed
+                , DateFormat.text ":"
+                , DateFormat.minuteFixed
+                ]
+                model.zone
+                model.time
+
+        date =
             DateFormat.format
                 [ DateFormat.monthNameFull
                 , DateFormat.text " "
@@ -161,43 +169,44 @@ timeCard model =
                 model.zone
                 model.time
     in
-    div [ class "card"]
-        [
-            div [ class "card-body" ]
-                [p [ class "fs-5" ] [text (hour ++ ":" ++ minute) ]
-                , p [class "fs-5"] [ text formatted ]
-                ]
+    div [ class "card" ]
+        [ div [ class "card-body" ]
+            [ p [ class "fs-5" ] [ text timeOfDay ]
+            , p [ class "fs-5" ] [ text date ]
+            ]
         ]
+
 
 activityCard : Model -> Html Msg
 activityCard model =
     div [ class "card" ]
-        [
-         div [ class "card-body text-center" ]
+        [ div [ class "card-body text-center" ]
             [ p [ class "fs-5" ] [ getActivityByIndex model |> text ]
             , button [ class "btn btn-primary", onClick GenerateRandomNumber ] [ text "New Activity" ]
-            , div [class "input-group", style "padding" "0.5ex"] [
-             input [class "form-control", type_ "text", value model.activityForm, onInput UpdateForm] []
-             ]
-            , button [ class "btn btn-primary", onClick (InsertActivityRequest { name = model.activityForm, id = ""}) ] [text "Add Activity"]
+            , div [ class "input-group", style "padding" "0.5ex" ]
+                [ input [ class "form-control", type_ "text", value model.activityForm, onInput UpdateForm ] []
+                ]
+            , button [ class "btn btn-primary", onClick (InsertActivityRequest { name = model.activityForm, id = "" }) ] [ text "Add Activity" ]
             , listActivities model
             ]
         ]
+
 
 listActivities : Model -> Html Msg
 listActivities model =
     let
         listElement : Activity -> Html Msg
         listElement a =
-            li [class "list-group-item"] [
-                text a.name
-                , button [ class "btn btn-sm btn-danger float-end", onClick (DeleteActivityRequest a) ] [text "Delete"]
-             ]
+            li [ class "list-group-item" ]
+                [ text a.name
+                , button [ class "btn btn-sm btn-danger float-end", onClick (DeleteActivityRequest a) ] [ text "Delete" ]
+                ]
     in
-    div [style "padding" "0.5ex"] [
-        List.map listElement (Array.toList model.activities)
-        |> ul [class "list-group-flush text-start justify-content-between"]
-    ]
+    div [ style "padding" "0.5ex" ]
+        [ List.map listElement (Array.toList model.activities)
+            |> ul [ class "list-group-flush text-start justify-content-between" ]
+        ]
+
 
 getActivityByIndex : Model -> String
 getActivityByIndex model =
@@ -212,6 +221,7 @@ getActivityByIndex model =
         Nothing ->
             ""
 
+
 displayLinks : List Link -> Html Msg
 displayLinks links =
     let
@@ -224,6 +234,7 @@ displayLinks links =
     List.map createLi links
         |> ul [ class "nav flex-column nav-pills" ]
 
+
 getActivities : String -> Cmd Msg
 getActivities url =
     Http.get
@@ -231,8 +242,9 @@ getActivities url =
         , expect = Http.expectJson GetActivitiesResponse activityResponseDecoder
         }
 
+
 postActivityRequest : Activity -> String -> String -> Cmd Msg
-postActivityRequest activity action url=
+postActivityRequest activity action url =
     Http.post
         { url = "http://" ++ url ++ "/activities/post"
         , body = Http.jsonBody (activityPostEncoder activity action)
