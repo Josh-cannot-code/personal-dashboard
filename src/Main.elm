@@ -14,6 +14,7 @@ import Activity exposing
     , ActivityResponse
     , activityResponseDecoder
     , activityPostEncoder)
+import DateFormat
 
 
 type alias Link =
@@ -137,13 +138,35 @@ main =
 timeCard : Model -> Html Msg
 timeCard model =
     let
-        hour = String.fromInt (Time.toHour model.zone model.time)
-        minute = String.fromInt (Time.toMinute model.zone model.time)
+        hour =
+            Time.toHour model.zone model.time
+            |> String.fromInt
+        minute =
+            Time.toMinute model.zone model.time
+            |> String.fromInt
+            |> String.padLeft 2 '0'
+        day =
+            Time.toDay model.zone model.time
+            |> String.fromInt
+        month =
+            Time.toMonth model.zone model.time
+        formatted =
+            DateFormat.format
+                [ DateFormat.monthNameFull
+                , DateFormat.text " "
+                , DateFormat.dayOfMonthSuffix
+                , DateFormat.text ", "
+                , DateFormat.yearNumber
+                ]
+                model.zone
+                model.time
     in
     div [ class "card"]
         [
             div [ class "card-body" ]
-                [p [ class "fs-5" ] [text (hour ++ ":" ++ minute) ]]
+                [p [ class "fs-5" ] [text (hour ++ ":" ++ minute) ]
+                , p [class "fs-5"] [ text formatted ]
+                ]
         ]
 
 activityCard : Model -> Html Msg
