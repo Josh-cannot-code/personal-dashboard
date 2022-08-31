@@ -38,10 +38,12 @@ type templateFiller struct {
 }
 
 func main() {
+	// Load environment variables
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	// Initialize database
 	dsn := "postgresql://" + os.Getenv("COCKROACH_KEY") + "@free-tier11.gcp-us-east1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full&options=--cluster%3Dpersonal-db-1796"
 	ctx := context.Background()
