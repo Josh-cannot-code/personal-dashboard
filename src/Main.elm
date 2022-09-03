@@ -38,8 +38,8 @@ type alias Model =
     }
 
 
-init : String -> ( Model, Cmd Msg )
-init url =
+init : ( String, Int ) -> ( Model, Cmd Msg )
+init ( url, ep ) =
     ( { activities = Array.fromList []
       , index = 0
       , activityForm = ""
@@ -51,9 +51,9 @@ init url =
       , time = Time.millisToPosix 0
       , zone = Time.utc
       , apiUrl = url
-      , eulerProblem = { id = 1, name = "", html = "" }
+      , eulerProblem = { id = 0, name = "", html = "" }
       }
-    , Cmd.batch [ Task.perform AdjustTimeZone Time.here, getActivities url, getCurrentEulerProblem { id = 11, name = "", html = "" } url ]
+    , Cmd.batch [ Task.perform AdjustTimeZone Time.here, getActivities url, getCurrentEulerProblem { id = ep, name = "", html = "" } url ]
     )
 
 
@@ -156,7 +156,7 @@ view model =
         ]
 
 
-main : Program String Model Msg
+main : Program ( String, Int ) Model Msg
 main =
     Browser.element
         { init = init
@@ -240,8 +240,8 @@ currentEulerProblem model =
                     [ text "error parsing html from project euler" ]
     in
     div [ class "card" ]
-        [ h4 [ class "card-title" ] [ text "Current Project Euler Problem" ]
-        , h5 [ class "card-subtitle text-muted" ] [ text (model.eulerProblem.name ++ " (Problem " ++ String.fromInt model.eulerProblem.id ++ ")") ]
+        [ h4 [ class "card-title", style "padding-top" "1ex", style "padding-left" "1ex" ] [ text "Current Project Euler Problem" ]
+        , h5 [ class "card-subtitle text-muted", style "padding-left" "2ex" ] [ text (model.eulerProblem.name ++ " (Problem " ++ String.fromInt model.eulerProblem.id ++ ")") ]
         , div [ class "card-body" ] content
         , div [ class "card-body" ]
             [ button [ class "btn btn-primary", onClick (GetEulerProblem { id = model.eulerProblem.id - 1, name = "", html = "" }) ] [ text "prev" ]
@@ -297,7 +297,7 @@ postActivityRequest activity action url =
 getCurrentEulerProblem : EulerProblem -> String -> Cmd Msg
 getCurrentEulerProblem problem url =
     Http.post
-        { url = "http://" ++ url ++ "/projecteuler"
+        { url = "http://" ++ url ++ "/project-euler/get-problem"
         , body = Http.jsonBody (eulerProblemEncoder problem)
         , expect = Http.expectJson GetEulerResponse eulerProblemDecoder
         }

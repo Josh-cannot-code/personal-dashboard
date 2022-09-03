@@ -20,7 +20,8 @@ import (
 var indexTmpl string
 
 type templateFiller struct {
-	ApiUrl string
+	ApiUrl        string
+	ProblemNumber int
 }
 
 func main() {
@@ -45,13 +46,26 @@ func main() {
 	}
 	fmt.Println(now)
 
+	// Get current project euler problem from db
+	rows, err := conn.Query(ctx, "SELECT number FROM project_euler")
+	if err != nil {
+		log.Fatal(fmt.Errorf("could not get euler problem: %w", err))
+	}
+	var currentProblem int
+	_ = rows.Next()
+	err = rows.Scan(&currentProblem)
+	if err != nil {
+		log.Fatal(fmt.Errorf("could not scan euler problem: %w", err))
+	}
+	rows.Close()
+
 	// Wire environment variables to the frontend
 	var indexHtml bytes.Buffer
 	templ, err := template.New("indexTmpl").Parse(indexTmpl)
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = templ.Execute(&indexHtml, templateFiller{ApiUrl: os.Getenv("API_URL")})
+	err = templ.Execute(&indexHtml, templateFiller{ApiUrl: os.Getenv("API_URL"), ProblemNumber: currentProblem})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -81,7 +95,7 @@ func main() {
 
 	http.Handle("/activities/post", activity.PostHandler(conn))
 
-	http.Handle("/projecteuler", projecteuler.EulerHandler())
+	http.Handle("/project-euler/get-problem", projecteuler.EulerHandler())
 
 	fs := http.FileServer(http.Dir("../"))
 	http.Handle("/", fs)
