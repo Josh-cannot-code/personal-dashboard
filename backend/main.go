@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v4"
 	"github.com/joho/godotenv"
+	"github.com/josh-cannot-code/backend/projecteuler"
 	"html/template"
 	"log"
 	"net/http"
@@ -158,6 +159,8 @@ func main() {
 
 	fs := http.FileServer(http.Dir("../"))
 	http.Handle("/", fs)
+
+	http.Handle("/projecteuler", projecteuler.EulerHandler())
 
 	log.Print("Listening on http://localhost:3001")
 	err = http.ListenAndServe(":3001", nil)
