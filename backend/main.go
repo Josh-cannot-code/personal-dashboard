@@ -4,34 +4,20 @@ import (
 	"bytes"
 	"context"
 	_ "embed"
-	"encoding/json"
 	"fmt"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
+	"github.com/josh-cannot-code/backend/activity"
+	"github.com/josh-cannot-code/backend/projecteuler"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 )
 
 //go:embed index.html.tmpl
 var indexTmpl string
-
-type Activity struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-}
-
-type ActivityResponse struct {
-	Activities []*Activity `json:"activities"`
-}
-
-type ActivityPost struct {
-	Activity Activity `json:"activity"`
-	Action   string   `json:"action"` // either insert or delete
-}
 
 type templateFiller struct {
 	ApiUrl string
@@ -47,8 +33,8 @@ func main() {
 	// Initialize database
 	dsn := "postgresql://" + os.Getenv("COCKROACH_KEY") + "@free-tier11.gcp-us-east1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full&options=--cluster%3Dpersonal-db-1796"
 	ctx := context.Background()
-	conn, err := pgx.Connect(ctx, dsn)
-	defer conn.Close(context.Background())
+	conn, err := pgxpool.Connect(ctx, dsn)
+	defer conn.Close()
 	if err != nil {
 		log.Fatal("failed to connect database", err)
 	}
@@ -59,7 +45,7 @@ func main() {
 	}
 	fmt.Println(now)
 
-	// Wire env vars to the frontend
+	// Wire environment variables to the frontend
 	var indexHtml bytes.Buffer
 	templ, err := template.New("indexTmpl").Parse(indexTmpl)
 	if err != nil {
@@ -90,71 +76,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	http.HandleFunc("/activities/get", func(w http.ResponseWriter, r *http.Request) {
-		actResp := &ActivityResponse{}
+	// Register handlers
+	http.Handle("/activities/", activity.ActivityHandler(conn))
 
-		rows, err := conn.Query(r.Context(), "SELECT * FROM activities")
-		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		defer rows.Close()
-		for rows.Next() {
-			var (
-				id   string
-				name string
-			)
-			if err := rows.Scan(&id, &name); err != nil {
-				log.Println(err)
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-			actResp.Activities = append(actResp.Activities, &Activity{
-				Id:   id,
-				Name: name,
-			})
-		}
-		actJson, err := json.Marshal(actResp)
-		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		_, err = w.Write(actJson)
-		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	})
-
-	http.HandleFunc("/activities/post", func(w http.ResponseWriter, r *http.Request) {
-		var ap ActivityPost
-		err = json.NewDecoder(r.Body).Decode(&ap)
-		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		switch ap.Action {
-		case "insert":
-			// TODO: make this unique?
-			_, err = conn.Exec(r.Context(), fmt.Sprintf("INSERT INTO activities (id, name) VALUES (DEFAULT, '%s')", strings.ToLower(ap.Activity.Name)))
-			if err != nil {
-				log.Println(err)
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-		case "delete":
-			_, err = conn.Exec(r.Context(), fmt.Sprintf("DELETE FROM activities WHERE id = '%s'", strings.ToLower(ap.Activity.Id)))
-			if err != nil {
-				log.Println(err)
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-		}
-	})
+	http.Handle("/project-euler/", projecteuler.EulerHandler(conn))
 
 	fs := http.FileServer(http.Dir("../"))
 	http.Handle("/", fs)

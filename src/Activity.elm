@@ -14,15 +14,10 @@ type alias Activity =
     }
 
 
-
-{- TODO this encoding an activity and action, need seperate encoder for currency -}
-
-
-activityPostEncoder : Activity -> String -> JE.Value
-activityPostEncoder activity action =
+activityPostEncoder : Activity -> JE.Value
+activityPostEncoder activity =
     JE.object
         [ ( "activity", activityEncoder activity )
-        , ( "action", JE.string action )
         ]
 
 
