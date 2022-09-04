@@ -38,8 +38,8 @@ type alias Model =
     }
 
 
-init : ( String, Int ) -> ( Model, Cmd Msg )
-init ( url, ep ) =
+init : String -> ( Model, Cmd Msg )
+init url =
     ( { activities = Array.fromList []
       , index = 0
       , activityForm = ""
@@ -51,9 +51,9 @@ init ( url, ep ) =
       , time = Time.millisToPosix 0
       , zone = Time.utc
       , apiUrl = url
-      , eulerProblem = { id = 0, name = "", html = "" }
+      , eulerProblem = { id = "", number = 0, name = "", html = "" }
       }
-    , Cmd.batch [ Task.perform AdjustTimeZone Time.here, getActivities url, getCurrentEulerProblem { id = ep, name = "", html = "" } url ]
+    , Cmd.batch [ Task.perform AdjustTimeZone Time.here, getActivities url, getCurrentEulerProblem url ]
     )
 
 
@@ -70,6 +70,9 @@ type Msg
     | DeleteActivityRequest Activity
     | GetEulerProblem EulerProblem
     | GetEulerResponse (Result Http.Error EulerProblem)
+    | NextEulerProblem
+    | PrevEulerProblem
+    | ChangeEulerResponse (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -123,13 +126,25 @@ update msg model =
             ( model, postActivityRequest activity "delete" model.apiUrl )
 
         GetEulerProblem problem ->
-            ( model, getCurrentEulerProblem problem model.apiUrl )
+            ( model, getCurrentEulerProblem model.apiUrl )
 
         GetEulerResponse (Ok newEp) ->
             ( { model | eulerProblem = newEp }, Cmd.none )
 
         GetEulerResponse (Err _) ->
-            ( { model | eulerProblem = { id = 0, name = "err", html = "err" } }, Cmd.none )
+            ( { model | eulerProblem = { id = "err", number = 0, name = "err", html = "err" } }, Cmd.none )
+
+        NextEulerProblem ->
+            ( model, changeEulerProblem model.eulerProblem "next" model.apiUrl )
+
+        PrevEulerProblem ->
+            ( model, changeEulerProblem model.eulerProblem "prev" model.apiUrl )
+
+        ChangeEulerResponse (Ok _) ->
+            ( model, getCurrentEulerProblem model.apiUrl )
+
+        ChangeEulerResponse (Err _) ->
+            ( model, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -156,7 +171,7 @@ view model =
         ]
 
 
-main : Program ( String, Int ) Model Msg
+main : Program String Model Msg
 main =
     Browser.element
         { init = init
@@ -241,11 +256,11 @@ currentEulerProblem model =
     in
     div [ class "card" ]
         [ h4 [ class "card-title", style "padding-top" "1ex", style "padding-left" "1ex" ] [ text "Current Project Euler Problem" ]
-        , h5 [ class "card-subtitle text-muted", style "padding-left" "2ex" ] [ text (model.eulerProblem.name ++ " (Problem " ++ String.fromInt model.eulerProblem.id ++ ")") ]
+        , h5 [ class "card-subtitle text-muted", style "padding-left" "2ex" ] [ text (model.eulerProblem.name ++ " (Problem " ++ String.fromInt model.eulerProblem.number ++ ")") ]
         , div [ class "card-body" ] content
         , div [ class "card-body" ]
-            [ button [ class "btn btn-primary", onClick (GetEulerProblem { id = model.eulerProblem.id - 1, name = "", html = "" }) ] [ text "prev" ]
-            , button [ class "btn btn-primary float-end", onClick (GetEulerProblem { id = model.eulerProblem.id + 1, name = "", html = "" }) ] [ text "next" ]
+            [ button [ class "btn btn-primary", onClick PrevEulerProblem ] [ text "prev" ]
+            , button [ class "btn btn-primary float-end", onClick NextEulerProblem ] [ text "next" ]
             ]
         ]
 
@@ -288,16 +303,24 @@ getActivities url =
 postActivityRequest : Activity -> String -> String -> Cmd Msg
 postActivityRequest activity action url =
     Http.post
-        { url = "http://" ++ url ++ "/activities/post"
-        , body = Http.jsonBody (activityPostEncoder activity action)
+        { url = "http://" ++ url ++ "/activities/" ++ action
+        , body = Http.jsonBody (activityPostEncoder activity)
         , expect = Http.expectString PostActivityResponse
         }
 
 
-getCurrentEulerProblem : EulerProblem -> String -> Cmd Msg
-getCurrentEulerProblem problem url =
-    Http.post
+getCurrentEulerProblem : String -> Cmd Msg
+getCurrentEulerProblem url =
+    Http.get
         { url = "http://" ++ url ++ "/project-euler/get-problem"
-        , body = Http.jsonBody (eulerProblemEncoder problem)
         , expect = Http.expectJson GetEulerResponse eulerProblemDecoder
+        }
+
+
+changeEulerProblem : EulerProblem -> String -> String -> Cmd Msg
+changeEulerProblem problem direction url =
+    Http.post
+        { url = "http://" ++ url ++ "/project-euler/" ++ direction
+        , body = Http.jsonBody (eulerProblemEncoder problem)
+        , expect = Http.expectString ChangeEulerResponse
         }

@@ -5,7 +5,8 @@ import Json.Encode as JE
 
 
 type alias EulerProblem =
-    { id : Int
+    { id : String
+    , number : Int
     , name : String
     , html : String
     }
@@ -14,7 +15,8 @@ type alias EulerProblem =
 eulerProblemEncoder : EulerProblem -> JE.Value
 eulerProblemEncoder problem =
     JE.object
-        [ ( "id", JE.int problem.id )
+        [ ( "id", JE.string problem.id )
+        , ( "number", JE.int problem.number )
         , ( "name", JE.string problem.name )
         , ( "html", JE.string problem.html )
         ]
@@ -22,7 +24,8 @@ eulerProblemEncoder problem =
 
 eulerProblemDecoder : JD.Decoder EulerProblem
 eulerProblemDecoder =
-    JD.map3 EulerProblem
-        (JD.field "id" JD.int)
+    JD.map4 EulerProblem
+        (JD.field "id" JD.string)
+        (JD.field "number" JD.int)
         (JD.field "name" JD.string)
         (JD.field "html" JD.string)
