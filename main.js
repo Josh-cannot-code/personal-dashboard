@@ -7202,8 +7202,6 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
-var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$ul = _VirtualDom_node('ul');
@@ -7236,7 +7234,7 @@ var $author$project$Main$listActivities = function (model) {
 		$elm$html$Html$div,
 		_List_fromArray(
 			[
-				A2($elm$html$Html$Attributes$style, 'padding', '0.5ex')
+				$elm$html$Html$Attributes$class('p-1')
 			]),
 		_List_fromArray(
 			[
@@ -7333,8 +7331,7 @@ var $author$project$Main$activityCard = function (model) {
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('card-title text-center'),
-						A2($elm$html$Html$Attributes$style, 'padding-top', '2ex')
+						$elm$html$Html$Attributes$class('card-title text-center pt-3')
 					]),
 				_List_fromArray(
 					[
@@ -7363,8 +7360,7 @@ var $author$project$Main$activityCard = function (model) {
 								$elm$html$Html$p,
 								_List_fromArray(
 									[
-										$elm$html$Html$Attributes$class('fs-5 fw-bolder'),
-										A2($elm$html$Html$Attributes$style, 'padding', '1ex')
+										$elm$html$Html$Attributes$class('fs-5 fw-bolder')
 									]),
 								_List_fromArray(
 									[
@@ -7387,8 +7383,7 @@ var $author$project$Main$activityCard = function (model) {
 						$elm$html$Html$div,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('input-group'),
-								A2($elm$html$Html$Attributes$style, 'padding', '1ex')
+								$elm$html$Html$Attributes$class('input-group m-2')
 							]),
 						_List_fromArray(
 							[
@@ -7396,7 +7391,7 @@ var $author$project$Main$activityCard = function (model) {
 								$elm$html$Html$input,
 								_List_fromArray(
 									[
-										$elm$html$Html$Attributes$class('form-control'),
+										$elm$html$Html$Attributes$class('form-control me-2'),
 										$elm$html$Html$Attributes$type_('text'),
 										$elm$html$Html$Attributes$value(model.activityForm),
 										$elm$html$Html$Events$onInput($author$project$Main$UpdateForm)
@@ -7409,8 +7404,7 @@ var $author$project$Main$activityCard = function (model) {
 										$elm$html$Html$Attributes$class('btn btn-sm btn-primary'),
 										$elm$html$Html$Events$onClick(
 										$author$project$Main$InsertActivityRequest(
-											{id: '', name: model.activityForm})),
-										A2($elm$html$Html$Attributes$style, 'margin-left', '1ex')
+											{id: '', name: model.activityForm}))
 									]),
 								_List_fromArray(
 									[
@@ -11057,9 +11051,7 @@ var $author$project$Main$currentEulerProblem = function (model) {
 				$elm$html$Html$h4,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('card-title'),
-						A2($elm$html$Html$Attributes$style, 'padding-top', '1ex'),
-						A2($elm$html$Html$Attributes$style, 'padding-left', '1ex')
+						$elm$html$Html$Attributes$class('card-title pt-3 ps-3')
 					]),
 				_List_fromArray(
 					[
@@ -11069,8 +11061,7 @@ var $author$project$Main$currentEulerProblem = function (model) {
 				$elm$html$Html$h5,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('card-subtitle text-muted'),
-						A2($elm$html$Html$Attributes$style, 'padding-left', '2ex')
+						$elm$html$Html$Attributes$class('card-subtitle text-muted ps-3')
 					]),
 				_List_fromArray(
 					[
@@ -11135,8 +11126,7 @@ var $author$project$Main$displayLinks = function (links) {
 			$elm$html$Html$li,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('nav-item w-80'),
-					A2($elm$html$Html$Attributes$style, 'padding', '0.5ex')
+					$elm$html$Html$Attributes$class('nav-item w-80 p-1')
 				]),
 			_List_fromArray(
 				[
@@ -11158,8 +11148,7 @@ var $author$project$Main$displayLinks = function (links) {
 		$elm$html$Html$div,
 		_List_fromArray(
 			[
-				$elm$html$Html$Attributes$class('card text-center'),
-				A2($elm$html$Html$Attributes$style, 'padding', '2ex')
+				$elm$html$Html$Attributes$class('card text-center')
 			]),
 		_List_fromArray(
 			[
@@ -11167,7 +11156,7 @@ var $author$project$Main$displayLinks = function (links) {
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('card-title')
+						$elm$html$Html$Attributes$class('card-title pt-3')
 					]),
 				_List_fromArray(
 					[
@@ -11209,8 +11198,7 @@ var $author$project$Main$lookingToHireCard = A2(
 			$elm$html$Html$h5,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('card-title'),
-					A2($elm$html$Html$Attributes$style, 'padding', '1ex')
+					$elm$html$Html$Attributes$class('card-title p-3')
 				]),
 			_List_fromArray(
 				[
@@ -12078,9 +12066,7 @@ var $author$project$Main$view = function (model) {
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('row'),
-						A2($elm$html$Html$Attributes$style, 'padding', '1ex'),
-						A2($elm$html$Html$Attributes$style, 'padding-top', '10ex')
+						$elm$html$Html$Attributes$class('row mt-5')
 					]),
 				_List_fromArray(
 					[

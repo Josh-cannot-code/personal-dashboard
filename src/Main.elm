@@ -179,7 +179,7 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ div [ class "row", style "padding" "1ex", style "padding-top" "10ex" ]
+        [ div [ class "row mt-5" ]
             [ div [ class "col" ]
                 [ displayLinks model.links |> columnCard
                 , currentEulerProblem model
@@ -255,18 +255,17 @@ activityCard model =
                     [ button [ class "btn btn-sm btn-primary float-start", onClick ToggleActivityList ] [ text "show activities" ] ]
     in
     div [ class "card" ]
-        [ div [ class "card-title text-center", style "padding-top" "2ex" ] [ h5 [] [ text "Activity Generator" ] ]
+        [ div [ class "card-title text-center pt-3" ] [ h5 [] [ text "Activity Generator" ] ]
         , div [ class "card-body text-center" ]
             [ div []
-                [ p [ class "fs-5 fw-bolder", style "padding" "1ex" ] [ getActivityByIndex model |> text ]
+                [ p [ class "fs-5 fw-bolder" ] [ getActivityByIndex model |> text ]
                 , button [ class "btn btn-sm btn-primary", onClick GenerateRandomNumber ] [ text "New Activity" ]
                 ]
-            , div [ class "input-group", style "padding" "1ex" ]
-                [ input [ class "form-control", type_ "text", value model.activityForm, onInput UpdateForm ] []
+            , div [ class "input-group m-2" ]
+                [ input [ class "form-control me-2", type_ "text", value model.activityForm, onInput UpdateForm ] []
                 , button
                     [ class "btn btn-sm btn-primary"
                     , onClick (InsertActivityRequest { name = model.activityForm, id = "" })
-                    , style "margin-left" "1ex"
                     ]
                     [ text "Add Activity" ]
                 ]
@@ -285,7 +284,7 @@ listActivities model =
                 , button [ class "btn btn-sm btn-danger float-end", onClick (DeleteActivityRequest a) ] [ text "Delete" ]
                 ]
     in
-    div [ style "padding" "0.5ex" ]
+    div [ class "p-1" ]
         [ List.map listElement (Array.toList model.activities)
             |> ul [ class "list-group-flush text-start justify-content-between" ]
         ]
@@ -311,8 +310,8 @@ currentEulerProblem model =
                 [ button [ class "btn btn-sm btn-primary", onClick ToggleEulerVisibility ] [ text "view problem" ] ]
     in
     div [ class "card" ]
-        [ h4 [ class "card-title", style "padding-top" "1ex", style "padding-left" "1ex" ] [ text "Current Project Euler Problem" ]
-        , h5 [ class "card-subtitle text-muted", style "padding-left" "2ex" ] [ text (model.eulerProblem.name ++ " (Problem " ++ String.fromInt model.eulerProblem.number ++ ")") ]
+        [ h4 [ class "card-title pt-3 ps-3" ] [ text "Current Project Euler Problem" ]
+        , h5 [ class "card-subtitle text-muted ps-3" ] [ text (model.eulerProblem.name ++ " (Problem " ++ String.fromInt model.eulerProblem.number ++ ")") ]
         , div [ class "card-body" ] content
         , div [ class "card-body" ]
             [ button [ class "btn btn-primary", onClick PrevEulerProblem ] [ text "prev" ]
@@ -324,7 +323,7 @@ currentEulerProblem model =
 lookingToHireCard : Html Msg
 lookingToHireCard =
     div [ class "card" ]
-        [ h5 [ class "card-title", style "padding" "1ex" ] [ text "Looking to Hire Me?" ]
+        [ h5 [ class "card-title p-3" ] [ text "Looking to Hire Me?" ]
         , div [ class "card-body" ]
             [ button [ class "btn btn-primary" ] [ text "Click Here!" ]
             ]
@@ -336,12 +335,12 @@ displayLinks links =
     let
         createLi : Link -> Html Msg
         createLi link =
-            li [ class "nav-item w-80", style "padding" "0.5ex" ]
+            li [ class "nav-item w-80 p-1" ]
                 [ a [ class "nav-link active", Tuple.second link |> href, target "_blank" ] [ Tuple.first link |> text ]
                 ]
     in
-    div [ class "card text-center", style "padding" "2ex" ]
-        [ div [ class "card-title" ] [ h5 [] [ text "Links" ] ]
+    div [ class "card text-center" ]
+        [ div [ class "card-title pt-3" ] [ h5 [] [ text "Links" ] ]
         , div [ class "card-body" ]
             [ List.map createLi links
                 |> ul [ class "nav flex-column nav-pills" ]
