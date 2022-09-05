@@ -7421,6 +7421,16 @@ var $author$project$Main$activityCard = function (model) {
 					]))
 			]));
 };
+var $author$project$Main$columnCard = function (html) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('mb-3')
+			]),
+		_List_fromArray(
+			[html]));
+};
 var $author$project$Main$NextEulerProblem = {$: 'NextEulerProblem'};
 var $author$project$Main$PrevEulerProblem = {$: 'PrevEulerProblem'};
 var $author$project$Main$ToggleEulerVisibility = {$: 'ToggleEulerVisibility'};
@@ -12082,7 +12092,8 @@ var $author$project$Main$view = function (model) {
 							]),
 						_List_fromArray(
 							[
-								$author$project$Main$displayLinks(model.links),
+								$author$project$Main$columnCard(
+								$author$project$Main$displayLinks(model.links)),
 								$author$project$Main$currentEulerProblem(model)
 							])),
 						A2(
@@ -12103,7 +12114,8 @@ var $author$project$Main$view = function (model) {
 							]),
 						_List_fromArray(
 							[
-								$author$project$Main$timeCard(model),
+								$author$project$Main$columnCard(
+								$author$project$Main$timeCard(model)),
 								$author$project$Main$lookingToHireCard
 							]))
 					]))

@@ -181,13 +181,13 @@ view model =
     div [ class "container" ]
         [ div [ class "row", style "padding" "1ex", style "padding-top" "10ex" ]
             [ div [ class "col" ]
-                [ displayLinks model.links
+                [ displayLinks model.links |> columnCard
                 , currentEulerProblem model
                 ]
             , div [ class "col" ]
                 [ activityCard model ]
             , div [ class "col text-center" ]
-                [ timeCard model
+                [ timeCard model |> columnCard
                 , lookingToHireCard
                 ]
             ]
@@ -202,6 +202,11 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
+
+
+columnCard : Html Msg -> Html Msg
+columnCard html =
+    div [ class "mb-3" ] [ html ]
 
 
 timeCard : Model -> Html Msg
