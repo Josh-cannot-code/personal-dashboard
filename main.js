@@ -6458,6 +6458,7 @@ var $author$project$Main$init = function (url) {
 					_Utils_Tuple2('GitHub', 'https://github.com')
 				]),
 			time: $elm$time$Time$millisToPosix(0),
+			visible: {activityList: false, eulerHtml: false},
 			zone: $elm$time$Time$utc
 		},
 		$elm$core$Platform$Cmd$batch(
@@ -6932,6 +6933,7 @@ var $elm$core$Array$length = function (_v0) {
 	return len;
 };
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $elm$core$Basics$not = _Basics_not;
 var $author$project$Main$PostActivityResponse = function (a) {
 	return {$: 'PostActivityResponse', a: a};
 };
@@ -7078,7 +7080,7 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					model,
 					A3($author$project$Main$changeEulerProblem, model.eulerProblem, 'prev', model.apiUrl));
-			default:
+			case 'ChangeEulerResponse':
 				if (msg.a.$ === 'Ok') {
 					return _Utils_Tuple2(
 						model,
@@ -7086,12 +7088,35 @@ var $author$project$Main$update = F2(
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
+			case 'ToggleEulerVisibility':
+				var curVisible = model.visible;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							visible: _Utils_update(
+								curVisible,
+								{eulerHtml: !model.visible.eulerHtml})
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var curVisible = model.visible;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							visible: _Utils_update(
+								curVisible,
+								{activityList: !model.visible.activityList})
+						}),
+					$elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Main$GenerateRandomNumber = {$: 'GenerateRandomNumber'};
 var $author$project$Main$InsertActivityRequest = function (a) {
 	return {$: 'InsertActivityRequest', a: a};
 };
+var $author$project$Main$ToggleActivityList = {$: 'ToggleActivityList'};
 var $author$project$Main$UpdateForm = function (a) {
 	return {$: 'UpdateForm', a: a};
 };
@@ -7154,6 +7179,7 @@ var $author$project$Main$getActivityByIndex = function (model) {
 		return '';
 	}
 };
+var $elm$html$Html$h5 = _VirtualDom_node('h5');
 var $elm$html$Html$input = _VirtualDom_node('input');
 var $author$project$Main$DeleteActivityRequest = function (a) {
 	return {$: 'DeleteActivityRequest', a: a};
@@ -7261,6 +7287,40 @@ var $elm$html$Html$p = _VirtualDom_node('p');
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$Main$activityCard = function (model) {
+	var activityList = model.visible.activityList ? A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				$author$project$Main$listActivities(model),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('btn btn-sm btn-primary float-start'),
+						$elm$html$Html$Events$onClick($author$project$Main$ToggleActivityList)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('hide activities')
+					]))
+			])) : A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('btn btn-sm btn-primary'),
+						$elm$html$Html$Events$onClick($author$project$Main$ToggleActivityList)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('show activities')
+					]))
+			]));
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
@@ -7273,38 +7333,62 @@ var $author$project$Main$activityCard = function (model) {
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
+						$elm$html$Html$Attributes$class('card-title text-center'),
+						A2($elm$html$Html$Attributes$style, 'padding-top', '2ex')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$h5,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Activity Generator')
+							]))
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
 						$elm$html$Html$Attributes$class('card-body text-center')
 					]),
 				_List_fromArray(
 					[
 						A2(
-						$elm$html$Html$p,
+						$elm$html$Html$div,
+						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('fs-5')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text(
-								$author$project$Main$getActivityByIndex(model))
-							])),
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('btn btn-primary'),
-								$elm$html$Html$Events$onClick($author$project$Main$GenerateRandomNumber)
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('New Activity')
+								A2(
+								$elm$html$Html$p,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('fs-5 fw-bolder'),
+										A2($elm$html$Html$Attributes$style, 'padding', '1ex')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(
+										$author$project$Main$getActivityByIndex(model))
+									])),
+								A2(
+								$elm$html$Html$button,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('btn btn-sm btn-primary'),
+										$elm$html$Html$Events$onClick($author$project$Main$GenerateRandomNumber)
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('New Activity')
+									]))
 							])),
 						A2(
 						$elm$html$Html$div,
 						_List_fromArray(
 							[
 								$elm$html$Html$Attributes$class('input-group'),
-								A2($elm$html$Html$Attributes$style, 'padding', '0.5ex')
+								A2($elm$html$Html$Attributes$style, 'padding', '1ex')
 							]),
 						_List_fromArray(
 							[
@@ -7317,29 +7401,30 @@ var $author$project$Main$activityCard = function (model) {
 										$elm$html$Html$Attributes$value(model.activityForm),
 										$elm$html$Html$Events$onInput($author$project$Main$UpdateForm)
 									]),
-								_List_Nil)
+								_List_Nil),
+								A2(
+								$elm$html$Html$button,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('btn btn-sm btn-primary'),
+										$elm$html$Html$Events$onClick(
+										$author$project$Main$InsertActivityRequest(
+											{id: '', name: model.activityForm})),
+										A2($elm$html$Html$Attributes$style, 'margin-left', '1ex')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Add Activity')
+									]))
 							])),
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('btn btn-primary'),
-								$elm$html$Html$Events$onClick(
-								$author$project$Main$InsertActivityRequest(
-									{id: '', name: model.activityForm}))
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Add Activity')
-							])),
-						$author$project$Main$listActivities(model)
+						activityList
 					]))
 			]));
 };
 var $author$project$Main$NextEulerProblem = {$: 'NextEulerProblem'};
 var $author$project$Main$PrevEulerProblem = {$: 'PrevEulerProblem'};
+var $author$project$Main$ToggleEulerVisibility = {$: 'ToggleEulerVisibility'};
 var $elm$html$Html$h4 = _VirtualDom_node('h4');
-var $elm$html$Html$h5 = _VirtualDom_node('h5');
 var $hecrj$html_parser$Html$Parser$Element = F3(
 	function (a, b, c) {
 		return {$: 'Element', a: a, b: b, c: c};
@@ -7582,7 +7667,6 @@ var $hecrj$html_parser$Html$Parser$isSpaceCharacter = function (c) {
 		_Utils_chr('\u00A0'))))));
 };
 var $elm$core$Basics$neq = _Utils_notEqual;
-var $elm$core$Basics$not = _Basics_not;
 var $elm$parser$Parser$Problem = function (a) {
 	return {$: 'Problem', a: a};
 };
@@ -10910,7 +10994,7 @@ var $hecrj$html_parser$Html$Parser$Util$toVirtualDomEach = function (node) {
 	}
 };
 var $author$project$Main$currentEulerProblem = function (model) {
-	var content = function () {
+	var html = function () {
 		var _v0 = $hecrj$html_parser$Html$Parser$run(model.eulerProblem.html);
 		if (_v0.$ === 'Ok') {
 			var nodeList = _v0.a;
@@ -10922,6 +11006,35 @@ var $author$project$Main$currentEulerProblem = function (model) {
 				]);
 		}
 	}();
+	var content = model.visible.eulerHtml ? _Utils_ap(
+		html,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('btn-sm btn-primary'),
+						$elm$html$Html$Events$onClick($author$project$Main$ToggleEulerVisibility)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('hide problem')
+					]))
+			])) : _List_fromArray(
+		[
+			A2(
+			$elm$html$Html$button,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('btn btn-sm btn-primary'),
+					$elm$html$Html$Events$onClick($author$project$Main$ToggleEulerVisibility)
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text('view problem')
+				]))
+		]);
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
@@ -11012,7 +11125,7 @@ var $author$project$Main$displayLinks = function (links) {
 			$elm$html$Html$li,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('nav-item w-50'),
+					$elm$html$Html$Attributes$class('nav-item w-80'),
 					A2($elm$html$Html$Attributes$style, 'padding', '0.5ex')
 				]),
 			_List_fromArray(
@@ -11032,13 +11145,87 @@ var $author$project$Main$displayLinks = function (links) {
 				]));
 	};
 	return A2(
-		$elm$html$Html$ul,
+		$elm$html$Html$div,
 		_List_fromArray(
 			[
-				$elm$html$Html$Attributes$class('nav flex-column nav-pills')
+				$elm$html$Html$Attributes$class('card text-center'),
+				A2($elm$html$Html$Attributes$style, 'padding', '2ex')
 			]),
-		A2($elm$core$List$map, createLi, links));
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('card-title')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$h5,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Links')
+							]))
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('card-body')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$ul,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('nav flex-column nav-pills')
+							]),
+						A2($elm$core$List$map, createLi, links))
+					]))
+			]));
 };
+var $author$project$Main$lookingToHireCard = A2(
+	$elm$html$Html$div,
+	_List_fromArray(
+		[
+			$elm$html$Html$Attributes$class('card')
+		]),
+	_List_fromArray(
+		[
+			A2(
+			$elm$html$Html$h5,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('card-title'),
+					A2($elm$html$Html$Attributes$style, 'padding', '1ex')
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text('Looking to Hire Me?')
+				])),
+			A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('card-body')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('btn btn-primary')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Click Here!')
+						]))
+				]))
+		]));
 var $ryannhg$date_format$DateFormat$DayOfMonthSuffix = {$: 'DayOfMonthSuffix'};
 var $ryannhg$date_format$DateFormat$dayOfMonthSuffix = $ryannhg$date_format$DateFormat$DayOfMonthSuffix;
 var $ryannhg$date_format$DateFormat$Language$Language = F6(
@@ -11895,7 +12082,8 @@ var $author$project$Main$view = function (model) {
 							]),
 						_List_fromArray(
 							[
-								$author$project$Main$displayLinks(model.links)
+								$author$project$Main$displayLinks(model.links),
+								$author$project$Main$currentEulerProblem(model)
 							])),
 						A2(
 						$elm$html$Html$div,
@@ -11915,34 +12103,8 @@ var $author$project$Main$view = function (model) {
 							]),
 						_List_fromArray(
 							[
-								$author$project$Main$timeCard(model)
-							]))
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('row'),
-						A2($elm$html$Html$Attributes$style, 'padding', '1ex')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('col')
-							]),
-						_List_Nil),
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('col')
-							]),
-						_List_fromArray(
-							[
-								$author$project$Main$currentEulerProblem(model)
+								$author$project$Main$timeCard(model),
+								$author$project$Main$lookingToHireCard
 							]))
 					]))
 			]));
