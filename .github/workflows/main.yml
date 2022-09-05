@@ -13,6 +13,8 @@ jobs:
       - name: Pull recent changes and build
         run: |
           cd $HOME/personal-dashboard
+          git stash
+          git stash clear
           git pull
           cd backend
           go install
