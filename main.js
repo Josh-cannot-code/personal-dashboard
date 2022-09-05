@@ -7313,7 +7313,7 @@ var $author$project$Main$activityCard = function (model) {
 				$elm$html$Html$button,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('btn btn-sm btn-primary'),
+						$elm$html$Html$Attributes$class('btn btn-sm btn-primary float-start'),
 						$elm$html$Html$Events$onClick($author$project$Main$ToggleActivityList)
 					]),
 				_List_fromArray(
@@ -11014,7 +11014,7 @@ var $author$project$Main$currentEulerProblem = function (model) {
 				$elm$html$Html$button,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('btn-sm btn-primary'),
+						$elm$html$Html$Attributes$class('btn-sm btn btn-primary'),
 						$elm$html$Html$Events$onClick($author$project$Main$ToggleEulerVisibility)
 					]),
 				_List_fromArray(

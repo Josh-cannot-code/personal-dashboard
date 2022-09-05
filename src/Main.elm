@@ -242,12 +242,12 @@ activityCard model =
             if model.visible.activityList then
                 div []
                     [ listActivities model
-                    , button [ class "btn btn-sm btn-primary", onClick ToggleActivityList ] [ text "hide activities" ]
+                    , button [ class "btn btn-sm btn-primary float-start", onClick ToggleActivityList ] [ text "hide activities" ]
                     ]
 
             else
                 div []
-                    [ button [ class "btn btn-sm btn-primary", onClick ToggleActivityList ] [ text "show activities" ] ]
+                    [ button [ class "btn btn-sm btn-primary float-start", onClick ToggleActivityList ] [ text "show activities" ] ]
     in
     div [ class "card" ]
         [ div [ class "card-title text-center", style "padding-top" "2ex" ] [ h5 [] [ text "Activity Generator" ] ]
