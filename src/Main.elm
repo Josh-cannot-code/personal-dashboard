@@ -10,13 +10,23 @@ import Activity
 import Array exposing (..)
 import Browser
 import DateFormat
+import Google
+    exposing
+        ( Event
+        , eventListDecoder
+        )
 import Html exposing (..)
 import Html.Attributes exposing (class, href, style, target, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Html.Parser
 import Html.Parser.Util
 import Http
-import ProjectEuler exposing (EulerProblem, eulerProblemDecoder, eulerProblemEncoder)
+import ProjectEuler
+    exposing
+        ( EulerProblem
+        , eulerProblemDecoder
+        , eulerProblemEncoder
+        )
 import Random exposing (..)
 import Task
 import Time
@@ -34,13 +44,14 @@ type alias Visible =
 
 type alias Model =
     { activities : Array Activity
+    , eulerProblem : EulerProblem
+    , events : List Event
     , index : Int
-    , activityForm : String
+    , activityForum : String
     , links : List Link
     , zone : Time.Zone
     , time : Time.Posix
     , apiUrl : String
-    , eulerProblem : EulerProblem
     , visible : Visible
     }
 
@@ -48,8 +59,9 @@ type alias Model =
 init : String -> ( Model, Cmd Msg )
 init url =
     ( { activities = Array.fromList []
+      , events = []
       , index = 0
-      , activityForm = ""
+      , activityForum = ""
       , links =
             [ ( "Calendar", "https://calendar.google.com/calendar/u/2/r" )
             , ( "MyCourses", "https://mycourses2.mcgill.ca/d2l/home" )
@@ -61,7 +73,12 @@ init url =
       , eulerProblem = { id = "", number = 0, name = "", html = "" }
       , visible = { activityList = False, eulerHtml = False }
       }
-    , Cmd.batch [ Task.perform AdjustTimeZone Time.here, getActivities url, getCurrentEulerProblem url ]
+    , Cmd.batch
+        [ Task.perform AdjustTimeZone Time.here
+        , getActivities url
+        , getCurrentEulerProblem url
+        , getEvents url
+        ]
     )
 
 
@@ -83,6 +100,8 @@ type Msg
     | ChangeEulerResponse (Result Http.Error String)
     | ToggleEulerVisibility
     | ToggleActivityList
+    | GetEventsRequest
+    | GetEventsResponse (Result Http.Error (List Event))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -112,7 +131,7 @@ update msg model =
             )
 
         UpdateForm text ->
-            ( { model | activityForm = text }, Cmd.none )
+            ( { model | activityForum = text }, Cmd.none )
 
         GetActivitiesRequest ->
             ( model, getActivities model.apiUrl )
@@ -127,10 +146,10 @@ update msg model =
             ( model, postActivityRequest activity "insert" model.apiUrl )
 
         PostActivityResponse (Ok _) ->
-            ( { model | activityForm = "" }, getActivities model.apiUrl )
+            ( { model | activityForum = "" }, getActivities model.apiUrl )
 
         PostActivityResponse (Err _) ->
-            ( { model | activityForm = "" }, Cmd.none )
+            ( { model | activityForum = "" }, Cmd.none )
 
         DeleteActivityRequest activity ->
             ( model, postActivityRequest activity "delete" model.apiUrl )
@@ -170,6 +189,15 @@ update msg model =
             in
             ( { model | visible = { curVisible | activityList = not model.visible.activityList } }, Cmd.none )
 
+        GetEventsRequest ->
+            ( model, getEvents model.apiUrl )
+
+        GetEventsResponse (Ok events) ->
+            ( { model | events = events }, Cmd.none )
+
+        GetEventsResponse (Err err) ->
+            ( { model | activityForum = "err" }, Cmd.none )
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -185,7 +213,9 @@ view model =
                 , currentEulerProblem model
                 ]
             , div [ class "col" ]
-                [ activityCard model ]
+                [ activityCard model |> columnCard
+                , eventsCard model
+                ]
             , div [ class "col text-center" ]
                 [ timeCard model |> columnCard
                 , lookingToHireCard
@@ -262,10 +292,10 @@ activityCard model =
                 , button [ class "btn btn-sm btn-primary", onClick GenerateRandomNumber ] [ text "New Activity" ]
                 ]
             , div [ class "input-group m-2" ]
-                [ input [ class "form-control me-2", type_ "text", value model.activityForm, onInput UpdateForm ] []
+                [ input [ class "form-control me-2", type_ "text", value model.activityForum, onInput UpdateForm ] []
                 , button
                     [ class "btn btn-sm btn-primary"
-                    , onClick (InsertActivityRequest { name = model.activityForm, id = "" })
+                    , onClick (InsertActivityRequest { name = model.activityForum, id = "" })
                     ]
                     [ text "Add Activity" ]
                 ]
@@ -348,6 +378,85 @@ displayLinks links =
         ]
 
 
+eventItem : Time.Zone -> Event -> Html Msg
+eventItem zone event =
+    let
+        eventDateProcessor : Int -> Int -> Int -> Html Msg
+        eventDateProcessor date start end =
+            if date /= 0 then
+                div []
+                    [ DateFormat.format
+                        [ DateFormat.monthNameAbbreviated
+                        , DateFormat.text " "
+                        , DateFormat.dayOfMonthSuffix
+                        , DateFormat.text ", "
+                        , DateFormat.yearNumber
+                        ]
+                        zone
+                        (Time.millisToPosix date)
+                        |> text
+                    ]
+
+            else
+                div []
+                    [ DateFormat.format
+                        [ DateFormat.monthNameAbbreviated
+                        , DateFormat.text " "
+                        , DateFormat.dayOfMonthSuffix
+                        , DateFormat.text ", "
+                        , DateFormat.yearNumber
+                        ]
+                        zone
+                        (Time.millisToPosix start)
+                        |> text
+                    , br [] []
+                    , DateFormat.format
+                        [ DateFormat.hourMilitaryFixed
+                        , DateFormat.text ":"
+                        , DateFormat.minuteFixed
+                        ]
+                        zone
+                        (Time.millisToPosix start)
+                        |> text
+                    , text " - "
+                    , DateFormat.format
+                        [ DateFormat.hourMilitaryFixed
+                        , DateFormat.text ":"
+                        , DateFormat.minuteFixed
+                        ]
+                        zone
+                        (Time.millisToPosix end)
+                        |> text
+                    ]
+
+        frequency : Html Msg
+        frequency =
+            if event.frequency /= "" then
+                text event.frequency
+
+            else
+                text ""
+    in
+    li [ class "list-group-item" ]
+        [ div []
+            [ h6 [] [ text event.name ]
+            , div [ class "text-end" ]
+                [ eventDateProcessor event.date event.startTime event.endTime
+                , frequency
+                ]
+            ]
+        ]
+
+
+eventsCard : Model -> Html Msg
+eventsCard model =
+    div [ class "card" ]
+        [ div [ class "card-title pt-3 ps-3" ] [ h5 [] [ text "Upcoming Events" ] ]
+        , div [ class "card-body" ]
+            [ List.map (eventItem model.zone) model.events |> ul [ class "list-group" ] ]
+        ]
+
+
 getActivityByIndex : Model -> String
 getActivityByIndex model =
     let
@@ -393,4 +502,12 @@ changeEulerProblem problem direction url =
         { url = "http://" ++ url ++ "/project-euler/" ++ direction
         , body = Http.jsonBody (eulerProblemEncoder problem)
         , expect = Http.expectString ChangeEulerResponse
+        }
+
+
+getEvents : String -> Cmd Msg
+getEvents url =
+    Http.get
+        { url = "http://" ++ url ++ "/google/calendar"
+        , expect = Http.expectJson GetEventsResponse eventListDecoder
         }

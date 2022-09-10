@@ -6426,6 +6426,30 @@ var $author$project$Main$getCurrentEulerProblem = function (url) {
 			url: 'http://' + (url + '/project-euler/get-problem')
 		});
 };
+var $author$project$Main$GetEventsResponse = function (a) {
+	return {$: 'GetEventsResponse', a: a};
+};
+var $author$project$Google$Event = F5(
+	function (name, date, startTime, endTime, frequency) {
+		return {date: date, endTime: endTime, frequency: frequency, name: name, startTime: startTime};
+	});
+var $elm$json$Json$Decode$map5 = _Json_map5;
+var $author$project$Google$eventDecoder = A6(
+	$elm$json$Json$Decode$map5,
+	$author$project$Google$Event,
+	A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'date', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'startTime', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'endTime', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'frequency', $elm$json$Json$Decode$string));
+var $author$project$Google$eventListDecoder = $elm$json$Json$Decode$list($author$project$Google$eventDecoder);
+var $author$project$Main$getEvents = function (url) {
+	return $elm$http$Http$get(
+		{
+			expect: A2($elm$http$Http$expectJson, $author$project$Main$GetEventsResponse, $author$project$Google$eventListDecoder),
+			url: 'http://' + (url + '/google/calendar')
+		});
+};
 var $elm$time$Time$Name = function (a) {
 	return {$: 'Name', a: a};
 };
@@ -6447,9 +6471,10 @@ var $author$project$Main$init = function (url) {
 	return _Utils_Tuple2(
 		{
 			activities: $elm$core$Array$fromList(_List_Nil),
-			activityForm: '',
+			activityForum: '',
 			apiUrl: url,
 			eulerProblem: {html: '', id: '', name: '', number: 0},
+			events: _List_Nil,
 			index: 0,
 			links: _List_fromArray(
 				[
@@ -6466,7 +6491,8 @@ var $author$project$Main$init = function (url) {
 				[
 					A2($elm$core$Task$perform, $author$project$Main$AdjustTimeZone, $elm$time$Time$here),
 					$author$project$Main$getActivities(url),
-					$author$project$Main$getCurrentEulerProblem(url)
+					$author$project$Main$getCurrentEulerProblem(url),
+					$author$project$Main$getEvents(url)
 				])));
 };
 var $author$project$Main$Tick = function (a) {
@@ -7007,7 +7033,7 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{activityForm: text}),
+						{activityForum: text}),
 					$elm$core$Platform$Cmd$none);
 			case 'GetActivitiesRequest':
 				return _Utils_Tuple2(
@@ -7036,13 +7062,13 @@ var $author$project$Main$update = F2(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{activityForm: ''}),
+							{activityForum: ''}),
 						$author$project$Main$getActivities(model.apiUrl));
 				} else {
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{activityForm: ''}),
+							{activityForum: ''}),
 						$elm$core$Platform$Cmd$none);
 				}
 			case 'DeleteActivityRequest':
@@ -7099,7 +7125,7 @@ var $author$project$Main$update = F2(
 								{eulerHtml: !model.visible.eulerHtml})
 						}),
 					$elm$core$Platform$Cmd$none);
-			default:
+			case 'ToggleActivityList':
 				var curVisible = model.visible;
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -7110,6 +7136,26 @@ var $author$project$Main$update = F2(
 								{activityList: !model.visible.activityList})
 						}),
 					$elm$core$Platform$Cmd$none);
+			case 'GetEventsRequest':
+				return _Utils_Tuple2(
+					model,
+					$author$project$Main$getEvents(model.apiUrl));
+			default:
+				if (msg.a.$ === 'Ok') {
+					var events = msg.a.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{events: events}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					var err = msg.a.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{activityForum: 'err'}),
+						$elm$core$Platform$Cmd$none);
+				}
 		}
 	});
 var $author$project$Main$GenerateRandomNumber = {$: 'GenerateRandomNumber'};
@@ -7393,7 +7439,7 @@ var $author$project$Main$activityCard = function (model) {
 									[
 										$elm$html$Html$Attributes$class('form-control me-2'),
 										$elm$html$Html$Attributes$type_('text'),
-										$elm$html$Html$Attributes$value(model.activityForm),
+										$elm$html$Html$Attributes$value(model.activityForum),
 										$elm$html$Html$Events$onInput($author$project$Main$UpdateForm)
 									]),
 								_List_Nil),
@@ -7404,7 +7450,7 @@ var $author$project$Main$activityCard = function (model) {
 										$elm$html$Html$Attributes$class('btn btn-sm btn-primary'),
 										$elm$html$Html$Events$onClick(
 										$author$project$Main$InsertActivityRequest(
-											{id: '', name: model.activityForm}))
+											{id: '', name: model.activityForum}))
 									]),
 								_List_fromArray(
 									[
@@ -11186,44 +11232,7 @@ var $author$project$Main$displayLinks = function (links) {
 					]))
 			]));
 };
-var $author$project$Main$lookingToHireCard = A2(
-	$elm$html$Html$div,
-	_List_fromArray(
-		[
-			$elm$html$Html$Attributes$class('card')
-		]),
-	_List_fromArray(
-		[
-			A2(
-			$elm$html$Html$h5,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('card-title p-3')
-				]),
-			_List_fromArray(
-				[
-					$elm$html$Html$text('Looking to Hire Me?')
-				])),
-			A2(
-			$elm$html$Html$div,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('card-body')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$button,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$class('btn btn-primary')
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text('Click Here!')
-						]))
-				]))
-		]));
+var $elm$html$Html$br = _VirtualDom_node('br');
 var $ryannhg$date_format$DateFormat$DayOfMonthSuffix = {$: 'DayOfMonthSuffix'};
 var $ryannhg$date_format$DateFormat$dayOfMonthSuffix = $ryannhg$date_format$DateFormat$DayOfMonthSuffix;
 var $ryannhg$date_format$DateFormat$Language$Language = F6(
@@ -11979,18 +11988,206 @@ var $ryannhg$date_format$DateFormat$formatWithLanguage = F4(
 				tokens));
 	});
 var $ryannhg$date_format$DateFormat$format = $ryannhg$date_format$DateFormat$formatWithLanguage($ryannhg$date_format$DateFormat$Language$english);
+var $elm$html$Html$h6 = _VirtualDom_node('h6');
 var $ryannhg$date_format$DateFormat$HourMilitaryFixed = {$: 'HourMilitaryFixed'};
 var $ryannhg$date_format$DateFormat$hourMilitaryFixed = $ryannhg$date_format$DateFormat$HourMilitaryFixed;
 var $ryannhg$date_format$DateFormat$MinuteFixed = {$: 'MinuteFixed'};
 var $ryannhg$date_format$DateFormat$minuteFixed = $ryannhg$date_format$DateFormat$MinuteFixed;
-var $ryannhg$date_format$DateFormat$MonthNameFull = {$: 'MonthNameFull'};
-var $ryannhg$date_format$DateFormat$monthNameFull = $ryannhg$date_format$DateFormat$MonthNameFull;
+var $ryannhg$date_format$DateFormat$MonthNameAbbreviated = {$: 'MonthNameAbbreviated'};
+var $ryannhg$date_format$DateFormat$monthNameAbbreviated = $ryannhg$date_format$DateFormat$MonthNameAbbreviated;
 var $ryannhg$date_format$DateFormat$Text = function (a) {
 	return {$: 'Text', a: a};
 };
 var $ryannhg$date_format$DateFormat$text = $ryannhg$date_format$DateFormat$Text;
 var $ryannhg$date_format$DateFormat$YearNumber = {$: 'YearNumber'};
 var $ryannhg$date_format$DateFormat$yearNumber = $ryannhg$date_format$DateFormat$YearNumber;
+var $author$project$Main$eventItem = F2(
+	function (zone, event) {
+		var frequency = (event.frequency !== '') ? $elm$html$Html$text(event.frequency) : $elm$html$Html$text('');
+		var eventDateProcessor = F3(
+			function (date, start, end) {
+				return (!(!date)) ? A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							A3(
+								$ryannhg$date_format$DateFormat$format,
+								_List_fromArray(
+									[
+										$ryannhg$date_format$DateFormat$monthNameAbbreviated,
+										$ryannhg$date_format$DateFormat$text(' '),
+										$ryannhg$date_format$DateFormat$dayOfMonthSuffix,
+										$ryannhg$date_format$DateFormat$text(', '),
+										$ryannhg$date_format$DateFormat$yearNumber
+									]),
+								zone,
+								$elm$time$Time$millisToPosix(date)))
+						])) : A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							A3(
+								$ryannhg$date_format$DateFormat$format,
+								_List_fromArray(
+									[
+										$ryannhg$date_format$DateFormat$monthNameAbbreviated,
+										$ryannhg$date_format$DateFormat$text(' '),
+										$ryannhg$date_format$DateFormat$dayOfMonthSuffix,
+										$ryannhg$date_format$DateFormat$text(', '),
+										$ryannhg$date_format$DateFormat$yearNumber
+									]),
+								zone,
+								$elm$time$Time$millisToPosix(start))),
+							A2($elm$html$Html$br, _List_Nil, _List_Nil),
+							$elm$html$Html$text(
+							A3(
+								$ryannhg$date_format$DateFormat$format,
+								_List_fromArray(
+									[
+										$ryannhg$date_format$DateFormat$hourMilitaryFixed,
+										$ryannhg$date_format$DateFormat$text(':'),
+										$ryannhg$date_format$DateFormat$minuteFixed
+									]),
+								zone,
+								$elm$time$Time$millisToPosix(start))),
+							$elm$html$Html$text(' - '),
+							$elm$html$Html$text(
+							A3(
+								$ryannhg$date_format$DateFormat$format,
+								_List_fromArray(
+									[
+										$ryannhg$date_format$DateFormat$hourMilitaryFixed,
+										$ryannhg$date_format$DateFormat$text(':'),
+										$ryannhg$date_format$DateFormat$minuteFixed
+									]),
+								zone,
+								$elm$time$Time$millisToPosix(end)))
+						]));
+			});
+		return A2(
+			$elm$html$Html$li,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('list-group-item')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$h6,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text(event.name)
+								])),
+							A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('text-end')
+								]),
+							_List_fromArray(
+								[
+									A3(eventDateProcessor, event.date, event.startTime, event.endTime),
+									frequency
+								]))
+						]))
+				]));
+	});
+var $author$project$Main$eventsCard = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('card')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('card-title pt-3 ps-3')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$h5,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Upcoming Events')
+							]))
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('card-body')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$ul,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('list-group')
+							]),
+						A2(
+							$elm$core$List$map,
+							$author$project$Main$eventItem(model.zone),
+							model.events))
+					]))
+			]));
+};
+var $author$project$Main$lookingToHireCard = A2(
+	$elm$html$Html$div,
+	_List_fromArray(
+		[
+			$elm$html$Html$Attributes$class('card')
+		]),
+	_List_fromArray(
+		[
+			A2(
+			$elm$html$Html$h5,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('card-title p-3')
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text('Looking to Hire Me?')
+				])),
+			A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('card-body')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('btn btn-primary')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Click Here!')
+						]))
+				]))
+		]));
+var $ryannhg$date_format$DateFormat$MonthNameFull = {$: 'MonthNameFull'};
+var $ryannhg$date_format$DateFormat$monthNameFull = $ryannhg$date_format$DateFormat$MonthNameFull;
 var $author$project$Main$timeCard = function (model) {
 	var timeOfDay = A3(
 		$ryannhg$date_format$DateFormat$format,
@@ -12090,7 +12287,9 @@ var $author$project$Main$view = function (model) {
 							]),
 						_List_fromArray(
 							[
-								$author$project$Main$activityCard(model)
+								$author$project$Main$columnCard(
+								$author$project$Main$activityCard(model)),
+								$author$project$Main$eventsCard(model)
 							])),
 						A2(
 						$elm$html$Html$div,

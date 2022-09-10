@@ -77,17 +77,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = google.GetUpcomingCalendarEvents(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// File server for index.html
+	fs := http.FileServer(http.Dir("../"))
 
 	// Register handlers
 	http.Handle("/activities/", activity.ActivityHandler(conn))
-
 	http.Handle("/project-euler/", projecteuler.EulerHandler(conn))
+	http.Handle("/google/calendar", google.EndpointHandler())
 
-	fs := http.FileServer(http.Dir("../"))
 	http.Handle("/", fs)
 
 	log.Print("Listening on http://localhost:3001")
