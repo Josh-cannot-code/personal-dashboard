@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/josh-cannot-code/backend/activity"
+	"github.com/josh-cannot-code/backend/google"
 	"github.com/josh-cannot-code/backend/projecteuler"
 	"html/template"
 	"log"
@@ -72,6 +73,11 @@ func main() {
 		log.Fatal(err)
 	}
 	err = os.Chdir("backend")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = google.GetUpcomingCalendarEvents(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
