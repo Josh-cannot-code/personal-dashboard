@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/josh-cannot-code/backend/activity"
+	"github.com/josh-cannot-code/backend/google"
 	"github.com/josh-cannot-code/backend/projecteuler"
 	"html/template"
 	"log"
@@ -76,12 +77,14 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// File server for index.html
+	fs := http.FileServer(http.Dir("../"))
+
 	// Register handlers
 	http.Handle("/activities/", activity.ActivityHandler(conn))
-
 	http.Handle("/project-euler/", projecteuler.EulerHandler(conn))
+	http.Handle("/google/calendar", google.EndpointHandler())
 
-	fs := http.FileServer(http.Dir("../"))
 	http.Handle("/", fs)
 
 	log.Print("Listening on http://localhost:3001")
