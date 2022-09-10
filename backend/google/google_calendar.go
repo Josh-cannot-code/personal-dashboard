@@ -85,7 +85,7 @@ func getUpcomingCalendarEvents(ctx context.Context) ([]*calendarEvent, error) {
 			if err != nil {
 				return nil, err
 			}
-			date = int(dateDate.UnixMilli())
+			date = int(dateDate.UTC().UnixMilli())
 			start = 0
 			end = 0
 		} else {
@@ -97,8 +97,8 @@ func getUpcomingCalendarEvents(ctx context.Context) ([]*calendarEvent, error) {
 			if err != nil {
 				return nil, err
 			}
-			start = int(startDate.UnixMilli())
-			end = int(endDate.UnixMilli())
+			start = int(startDate.UTC().UnixMilli())
+			end = int(endDate.UTC().UnixMilli())
 			date = 0
 		}
 
