@@ -7027,7 +7027,7 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{zone: newZone}),
-					$elm$core$Platform$Cmd$none);
+					$author$project$Main$getEvents(model.apiUrl));
 			case 'UpdateForm':
 				var text = msg.a;
 				return _Utils_Tuple2(

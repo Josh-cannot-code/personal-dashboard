@@ -127,7 +127,7 @@ update msg model =
 
         AdjustTimeZone newZone ->
             ( { model | zone = newZone }
-            , Cmd.none
+            , getEvents model.apiUrl
             )
 
         UpdateForm text ->
