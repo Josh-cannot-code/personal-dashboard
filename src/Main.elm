@@ -65,7 +65,7 @@ init url =
       , links =
             [ ( "Calendar", "https://calendar.google.com/calendar/u/2/r" )
             , ( "MyCourses", "https://mycourses2.mcgill.ca/d2l/home" )
-            , ( "GitHub", "https://github.com" )
+            , ( "GitHub", "https://github.com/Josh-cannot-code" )
             ]
       , time = Time.millisToPosix 0
       , zone = Time.utc
@@ -209,7 +209,7 @@ view model =
     div [ class "container" ]
         [ div [ class "row mt-5" ]
             [ div [ class "col" ]
-                [ displayLinks model.links |> columnCard
+                [ linksCard model.links |> columnCard
                 , currentEulerProblem model
                 ]
             , div [ class "col" ]
@@ -360,13 +360,13 @@ lookingToHireCard =
         ]
 
 
-displayLinks : List Link -> Html Msg
-displayLinks links =
+linksCard : List Link -> Html Msg
+linksCard links =
     let
         createLi : Link -> Html Msg
         createLi link =
             li [ class "nav-item w-80 p-1" ]
-                [ a [ class "nav-link active", Tuple.second link |> href, target "_blank" ] [ Tuple.first link |> text ]
+                [ a [ class "nav-link active text-dark", Tuple.second link |> href, target "_blank" ] [ Tuple.first link |> text ]
                 ]
     in
     div [ class "card text-center" ]

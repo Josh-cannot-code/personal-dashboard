@@ -6480,7 +6480,7 @@ var $author$project$Main$init = function (url) {
 				[
 					_Utils_Tuple2('Calendar', 'https://calendar.google.com/calendar/u/2/r'),
 					_Utils_Tuple2('MyCourses', 'https://mycourses2.mcgill.ca/d2l/home'),
-					_Utils_Tuple2('GitHub', 'https://github.com')
+					_Utils_Tuple2('GitHub', 'https://github.com/Josh-cannot-code')
 				]),
 			time: $elm$time$Time$millisToPosix(0),
 			visible: {activityList: false, eulerHtml: false},
@@ -11154,84 +11154,6 @@ var $author$project$Main$currentEulerProblem = function (model) {
 					]))
 			]));
 };
-var $elm$html$Html$a = _VirtualDom_node('a');
-var $elm$html$Html$Attributes$href = function (url) {
-	return A2(
-		$elm$html$Html$Attributes$stringProperty,
-		'href',
-		_VirtualDom_noJavaScriptUri(url));
-};
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
-var $elm$html$Html$Attributes$target = $elm$html$Html$Attributes$stringProperty('target');
-var $author$project$Main$displayLinks = function (links) {
-	var createLi = function (link) {
-		return A2(
-			$elm$html$Html$li,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('nav-item w-80 p-1')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$a,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$class('nav-link active'),
-							$elm$html$Html$Attributes$href(link.b),
-							$elm$html$Html$Attributes$target('_blank')
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text(link.a)
-						]))
-				]));
-	};
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('card text-center')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('card-title pt-3')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$h5,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Links')
-							]))
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('card-body')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$ul,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('nav flex-column nav-pills')
-							]),
-						A2($elm$core$List$map, createLi, links))
-					]))
-			]));
-};
 var $elm$html$Html$br = _VirtualDom_node('br');
 var $ryannhg$date_format$DateFormat$DayOfMonthSuffix = {$: 'DayOfMonthSuffix'};
 var $ryannhg$date_format$DateFormat$dayOfMonthSuffix = $ryannhg$date_format$DateFormat$DayOfMonthSuffix;
@@ -12148,6 +12070,84 @@ var $author$project$Main$eventsCard = function (model) {
 					]))
 			]));
 };
+var $elm$html$Html$a = _VirtualDom_node('a');
+var $elm$html$Html$Attributes$href = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'href',
+		_VirtualDom_noJavaScriptUri(url));
+};
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $elm$html$Html$Attributes$target = $elm$html$Html$Attributes$stringProperty('target');
+var $author$project$Main$linksCard = function (links) {
+	var createLi = function (link) {
+		return A2(
+			$elm$html$Html$li,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('nav-item w-80 p-1')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$a,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('nav-link active text-dark'),
+							$elm$html$Html$Attributes$href(link.b),
+							$elm$html$Html$Attributes$target('_blank')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(link.a)
+						]))
+				]));
+	};
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('card text-center')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('card-title pt-3')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$h5,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Links')
+							]))
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('card-body')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$ul,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('nav flex-column nav-pills')
+							]),
+						A2($elm$core$List$map, createLi, links))
+					]))
+			]));
+};
 var $author$project$Main$lookingToHireCard = A2(
 	$elm$html$Html$div,
 	_List_fromArray(
@@ -12276,7 +12276,7 @@ var $author$project$Main$view = function (model) {
 						_List_fromArray(
 							[
 								$author$project$Main$columnCard(
-								$author$project$Main$displayLinks(model.links)),
+								$author$project$Main$linksCard(model.links)),
 								$author$project$Main$currentEulerProblem(model)
 							])),
 						A2(
