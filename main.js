@@ -6479,8 +6479,13 @@ var $author$project$Main$init = function (url) {
 			links: _List_fromArray(
 				[
 					_Utils_Tuple2('Calendar', 'https://calendar.google.com/calendar/u/2/r'),
+					_Utils_Tuple2('Gmail', 'https://mail.google.com/'),
+					_Utils_Tuple2('Outlook', 'https://outlook.office.com/mail/'),
 					_Utils_Tuple2('MyCourses', 'https://mycourses2.mcgill.ca/d2l/home'),
-					_Utils_Tuple2('GitHub', 'https://github.com/Josh-cannot-code')
+					_Utils_Tuple2('GitHub', 'https://github.com/Josh-cannot-code'),
+					_Utils_Tuple2('Overleaf', 'https://www.overleaf.com'),
+					_Utils_Tuple2('Crowdmark', 'https://app.crowdmark.com'),
+					_Utils_Tuple2('My Resume', '../static/Resume_Oct_1.pdf')
 				]),
 			time: $elm$time$Time$millisToPosix(0),
 			visible: {activityList: false, eulerHtml: false},
@@ -7278,17 +7283,14 @@ var $author$project$Main$listActivities = function (model) {
 	};
 	return A2(
 		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('p-1')
-			]),
+		_List_Nil,
 		_List_fromArray(
 			[
 				A2(
 				$elm$html$Html$ul,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('list-group-flush text-start justify-content-between')
+						$elm$html$Html$Attributes$class('list-group list-group-flush text-start justify-content-between bg-secondary')
 					]),
 				A2(
 					$elm$core$List$map,
@@ -7331,40 +7333,34 @@ var $elm$html$Html$p = _VirtualDom_node('p');
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$Main$activityCard = function (model) {
-	var activityList = model.visible.activityList ? A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				$author$project$Main$listActivities(model),
-				A2(
-				$elm$html$Html$button,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('btn btn-sm btn-primary float-start'),
-						$elm$html$Html$Events$onClick($author$project$Main$ToggleActivityList)
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('hide activities')
-					]))
-			])) : A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$button,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('btn btn-sm btn-primary float-start'),
-						$elm$html$Html$Events$onClick($author$project$Main$ToggleActivityList)
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('show activities')
-					]))
-			]));
+	var activityList = model.visible.activityList ? _List_fromArray(
+		[
+			A2(
+			$elm$html$Html$button,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('btn btn-sm btn-primary float-start'),
+					$elm$html$Html$Events$onClick($author$project$Main$ToggleActivityList)
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text('hide activities')
+				])),
+			$author$project$Main$listActivities(model)
+		]) : _List_fromArray(
+		[
+			A2(
+			$elm$html$Html$button,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('btn btn-sm btn-primary float-start'),
+					$elm$html$Html$Events$onClick($author$project$Main$ToggleActivityList)
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text('show activities')
+				]))
+		]);
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
@@ -7457,7 +7453,7 @@ var $author$project$Main$activityCard = function (model) {
 										$elm$html$Html$text('Add Activity')
 									]))
 							])),
-						activityList
+						A2($elm$html$Html$div, _List_Nil, activityList)
 					]))
 			]));
 };
@@ -11057,7 +11053,6 @@ var $author$project$Main$currentEulerProblem = function (model) {
 		}
 	}();
 	var content = model.visible.eulerHtml ? _Utils_ap(
-		html,
 		_List_fromArray(
 			[
 				A2(
@@ -11071,7 +11066,8 @@ var $author$project$Main$currentEulerProblem = function (model) {
 					[
 						$elm$html$Html$text('hide problem')
 					]))
-			])) : _List_fromArray(
+			]),
+		html) : _List_fromArray(
 		[
 			A2(
 			$elm$html$Html$button,
@@ -12148,44 +12144,6 @@ var $author$project$Main$linksCard = function (links) {
 					]))
 			]));
 };
-var $author$project$Main$lookingToHireCard = A2(
-	$elm$html$Html$div,
-	_List_fromArray(
-		[
-			$elm$html$Html$Attributes$class('card')
-		]),
-	_List_fromArray(
-		[
-			A2(
-			$elm$html$Html$h5,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('card-title p-3')
-				]),
-			_List_fromArray(
-				[
-					$elm$html$Html$text('Looking to Hire Me?')
-				])),
-			A2(
-			$elm$html$Html$div,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('card-body')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$button,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$class('btn btn-primary')
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text('Click Here!')
-						]))
-				]))
-		]));
 var $ryannhg$date_format$DateFormat$MonthNameFull = {$: 'MonthNameFull'};
 var $ryannhg$date_format$DateFormat$monthNameFull = $ryannhg$date_format$DateFormat$MonthNameFull;
 var $author$project$Main$timeCard = function (model) {
@@ -12276,8 +12234,7 @@ var $author$project$Main$view = function (model) {
 						_List_fromArray(
 							[
 								$author$project$Main$columnCard(
-								$author$project$Main$linksCard(model.links)),
-								$author$project$Main$currentEulerProblem(model)
+								$author$project$Main$linksCard(model.links))
 							])),
 						A2(
 						$elm$html$Html$div,
@@ -12301,7 +12258,7 @@ var $author$project$Main$view = function (model) {
 							[
 								$author$project$Main$columnCard(
 								$author$project$Main$timeCard(model)),
-								$author$project$Main$lookingToHireCard
+								$author$project$Main$currentEulerProblem(model)
 							]))
 					]))
 			]));

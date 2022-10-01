@@ -64,8 +64,13 @@ init url =
       , activityForum = ""
       , links =
             [ ( "Calendar", "https://calendar.google.com/calendar/u/2/r" )
+            , ( "Gmail", "https://mail.google.com/" )
+            , ( "Outlook", "https://outlook.office.com/mail/")
             , ( "MyCourses", "https://mycourses2.mcgill.ca/d2l/home" )
             , ( "GitHub", "https://github.com/Josh-cannot-code" )
+            , ( "Overleaf", "https://www.overleaf.com")
+            , ( "Crowdmark", "https://app.crowdmark.com")
+            , ( "My Resume", "../static/Resume_Oct_1.pdf")
             ]
       , time = Time.millisToPosix 0
       , zone = Time.utc
@@ -210,7 +215,6 @@ view model =
         [ div [ class "row mt-5" ]
             [ div [ class "col" ]
                 [ linksCard model.links |> columnCard
-                , currentEulerProblem model
                 ]
             , div [ class "col" ]
                 [ activityCard model |> columnCard
@@ -218,7 +222,7 @@ view model =
                 ]
             , div [ class "col text-center" ]
                 [ timeCard model |> columnCard
-                , lookingToHireCard
+                , currentEulerProblem model
                 ]
             ]
         ]
@@ -275,14 +279,12 @@ activityCard model =
     let
         activityList =
             if model.visible.activityList then
-                div []
-                    [ listActivities model
-                    , button [ class "btn btn-sm btn-primary float-start", onClick ToggleActivityList ] [ text "hide activities" ]
-                    ]
+                [ button [ class "btn btn-sm btn-primary float-start", onClick ToggleActivityList ] [ text "hide activities" ]
+                , listActivities model
+                ]
 
             else
-                div []
-                    [ button [ class "btn btn-sm btn-primary float-start", onClick ToggleActivityList ] [ text "show activities" ] ]
+                [ button [ class "btn btn-sm btn-primary float-start", onClick ToggleActivityList ] [ text "show activities" ] ]
     in
     div [ class "card" ]
         [ div [ class "card-title text-center pt-3" ] [ h5 [] [ text "Activity Generator" ] ]
@@ -299,7 +301,7 @@ activityCard model =
                     ]
                     [ text "Add Activity" ]
                 ]
-            , activityList
+                , div [] activityList
             ]
         ]
 
@@ -314,9 +316,9 @@ listActivities model =
                 , button [ class "btn btn-sm btn-danger float-end", onClick (DeleteActivityRequest a) ] [ text "Delete" ]
                 ]
     in
-    div [ class "p-1" ]
+    div []
         [ List.map listElement (Array.toList model.activities)
-            |> ul [ class "list-group-flush text-start justify-content-between" ]
+            |> ul [ class "list-group list-group-flush text-start justify-content-between bg-secondary" ]
         ]
 
 
@@ -333,8 +335,7 @@ currentEulerProblem model =
 
         content =
             if model.visible.eulerHtml then
-                html
-                    ++ [ button [ class "btn-sm btn btn-primary", onClick ToggleEulerVisibility ] [ text "hide problem" ] ]
+                [ button [ class "btn-sm btn btn-primary", onClick ToggleEulerVisibility ] [ text "hide problem" ] ] ++ html
 
             else
                 [ button [ class "btn btn-sm btn-primary", onClick ToggleEulerVisibility ] [ text "view problem" ] ]
@@ -346,16 +347,6 @@ currentEulerProblem model =
         , div [ class "card-body" ]
             [ button [ class "btn btn-primary", onClick PrevEulerProblem ] [ text "prev" ]
             , button [ class "btn btn-primary float-end", onClick NextEulerProblem ] [ text "next" ]
-            ]
-        ]
-
-
-lookingToHireCard : Html Msg
-lookingToHireCard =
-    div [ class "card" ]
-        [ h5 [ class "card-title p-3" ] [ text "Looking to Hire Me?" ]
-        , div [ class "card-body" ]
-            [ button [ class "btn btn-primary" ] [ text "Click Here!" ]
             ]
         ]
 

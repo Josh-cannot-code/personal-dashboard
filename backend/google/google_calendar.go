@@ -9,6 +9,7 @@ import (
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/option"
 	"os"
+	"sort"
 	"strings"
 	"time"
 )
@@ -119,6 +120,9 @@ func getUpcomingCalendarEvents(ctx context.Context) ([]*calendarEvent, error) {
 				}, "")
 			}
 		}
+		if date == 0 {
+			date = start
+		}
 		calendarEvents = append(calendarEvents, &calendarEvent{
 			Name:      item.Summary,
 			Date:      date,
@@ -127,6 +131,12 @@ func getUpcomingCalendarEvents(ctx context.Context) ([]*calendarEvent, error) {
 			Frequency: frequency,
 		})
 	}
-
-	return lo.Reverse(calendarEvents), nil
+	now := int(time.Now().UnixMilli())
+	calendarEvents = lo.Filter(calendarEvents, func(event *calendarEvent, _ int) bool {
+		return event.Date > now
+	})
+	sort.Slice(calendarEvents, func(i, j int) bool {
+		return calendarEvents[i].Date < calendarEvents[j].Date
+	})
+	return calendarEvents, nil
 }
