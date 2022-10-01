@@ -1,0 +1,22 @@
+{
+  "name": "personal-dashboard",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Josh-cannot-code/personal-dashboard.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Josh-cannot-code/personal-dashboard/issues"
+  },
+  "homepage": "https://github.com/Josh-cannot-code/personal-dashboard#readme",
+  "dependencies": {
+    "bootstrap": "^5.0.1"
+  }
+}

@@ -1,0 +1,23 @@
+$primary: #CDE9D6;
+$danger: #F8D3CF;
+$secondary: #FFF1CB;
+$third-color: #95ab98;
+$info: #D2E4FD;
+
+.bg-color {
+  background-color: #606060 !important;
+}
+
+.card {
+  background-color: $info !important;
+}
+
+.btn-primary {
+  border-color: $third-color !important;
+}
+
+.nav-link {
+  border: 1px solid $third-color !important;
+}
+
+@import "../node_modules/bootstrap/scss/bootstrap";
