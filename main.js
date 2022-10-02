@@ -6485,7 +6485,7 @@ var $author$project$Main$init = function (url) {
 					_Utils_Tuple2('GitHub', 'https://github.com/Josh-cannot-code'),
 					_Utils_Tuple2('Overleaf', 'https://www.overleaf.com'),
 					_Utils_Tuple2('Crowdmark', 'https://app.crowdmark.com'),
-					_Utils_Tuple2('My Resume', '../static/Resume_Oct_1.pdf')
+					_Utils_Tuple2('My Resume', '../static/Resume_Oct_2.pdf')
 				]),
 			time: $elm$time$Time$millisToPosix(0),
 			visible: {activityList: false, eulerHtml: false},

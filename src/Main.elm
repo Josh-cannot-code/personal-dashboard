@@ -70,7 +70,7 @@ init url =
             , ( "GitHub", "https://github.com/Josh-cannot-code" )
             , ( "Overleaf", "https://www.overleaf.com")
             , ( "Crowdmark", "https://app.crowdmark.com")
-            , ( "My Resume", "../static/Resume_Oct_1.pdf")
+            , ( "My Resume", "../static/Resume_Oct_2.pdf")
             ]
       , time = Time.millisToPosix 0
       , zone = Time.utc
